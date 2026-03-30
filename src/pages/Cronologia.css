@@ -1,0 +1,91 @@
+/* src/pages/Cronologia.css */
+
+.crono-wrap { width: 100%; }
+.crono-panel { padding: 18px; }
+
+.crono-header{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom: 14px;
+}
+
+.crono-filters{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:end;
+  margin-bottom: 12px;
+}
+
+.crono-filters .field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width: 180px;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-size: 13px;
+  opacity: .95;
+}
+
+.crono-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top: 12px;
+}
+
+.crono-item{
+  display:flex;
+  justify-content: space-between;
+  gap:12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.crono-left{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.crono-right{
+  text-align:right;
+  opacity:.9;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.crono-title{
+  font-weight: 700;
+}
+
+.crono-sub{
+  opacity: .85;
+  font-size: 13px;
+}
+/* src/pages/Cronologia.css */
+.crono-wrap { width: 100%; }
+.crono-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.crono-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.crono-left { display: flex; flex-direction: column; gap: 4px; }
+.crono-title { font-weight: 700; }
+.crono-sub { opacity: 0.8; font-size: 13px; }
+.crono-right { opacity: 0.8; font-size: 13px; white-space: nowrap; }

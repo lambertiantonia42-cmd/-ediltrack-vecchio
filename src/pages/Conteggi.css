@@ -1,0 +1,34 @@
+/* ===== PRESENZE TABLE (Cantieri) ===== */
+.presenze-table{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:400px;
+  overflow:auto;
+}
+
+.presenza-row{
+  display:grid;
+  grid-template-columns: 120px 1fr 100px 120px 1fr;
+  align-items:center;
+
+  padding:10px;
+
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.06);
+
+  background: rgba(255,255,255,.03);
+
+  font-size:13px;
+}
+
+.presenza-row.header{
+  background: transparent;
+  font-weight:700;
+  border:none;
+  opacity:.7;
+}
+
+.presenza-row:hover{
+  background: rgba(255,255,255,.06);
+}

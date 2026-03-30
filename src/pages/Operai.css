@@ -1,0 +1,232 @@
+/* ===== OPERAI PAGE ===== */
+
+.operai-wrap{
+display:flex;
+flex-direction:column;
+gap:20px;
+}
+
+.operai-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+}
+
+.operai-add{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+align-items:center;
+}
+
+.operai-add input{
+padding:10px 12px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,.12);
+background:rgba(255,255,255,.06);
+color:#fff;
+min-width:180px;
+}
+
+.operai-add button{
+padding:10px 16px;
+border-radius:12px;
+border:none;
+background:#fbbf24;
+color:#000;
+font-weight:700;
+cursor:pointer;
+}
+
+.operai-add button:hover{
+background:#ffd166;
+}
+
+/* tabella */
+
+.operai-table{
+width:100%;
+border-collapse:collapse;
+border-radius:16px;
+overflow:hidden;
+}
+
+.operai-table thead{
+background:rgba(255,255,255,.08);
+}
+
+.operai-table th{
+text-align:left;
+padding:12px;
+font-size:14px;
+color:#fbbf24;
+}
+
+.operai-table td{
+padding:12px;
+border-top:1px solid rgba(255,255,255,.08);
+}
+
+.operai-table tr:hover{
+background:rgba(255,255,255,.04);
+}
+
+/* input paga */
+
+.operai-paga{
+width:80px;
+padding:6px 8px;
+border-radius:10px;
+border:1px solid rgba(255,255,255,.12);
+background:rgba(255,255,255,.06);
+color:#fff;
+}
+
+/* azioni */
+
+.operai-actions{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+.operai-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.operai-table th,
+.operai-table td {
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* ALLINEAMENTO COLONNE */
+.operai-table th:nth-child(1),
+.operai-table td:nth-child(1) {
+  width: 20%;
+}
+
+.operai-table th:nth-child(2),
+.operai-table td:nth-child(2) {
+  width: 15%;
+}
+
+.operai-table th:nth-child(3),
+.operai-table td:nth-child(3) {
+  width: 20%;
+}
+
+.operai-table th:nth-child(4),
+.operai-table td:nth-child(4) {
+  width: 25%;
+}
+
+.operai-table th:nth-child(5),
+.operai-table td:nth-child(5) {
+  width: 20%;
+}
+
+/* INPUT DATE */
+.operai-table input[type="date"] {
+  width: 100%;
+  min-width: 120px;
+}
+
+/* SELECT */
+.operai-table select {
+  width: 100%;
+}
+
+/* STATO BADGE */
+.badge {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.badge.attivo {
+  background: rgba(0,255,150,0.12);
+  color: #00d084;
+}
+
+.badge.malattia {
+  background: rgba(255,176,32,0.15);
+  color: #ffb020;
+}
+
+.badge.ferie {
+  background: rgba(0,194,255,0.15);
+  color: #00c2ff;
+}
+
+.badge.cessato {
+  background: rgba(255,0,0,0.15);
+  color: #ff6b6b;
+}
+
+/* ===== MIGLIORAMENTI LAYOUT ===== */
+
+/* colonna paga: testo sopra, matita sotto */
+.operai-paga-box{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:4px;
+}
+
+.operai-edit-btn{
+  font-size:12px;
+  padding:4px 6px;
+  border-radius:6px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  cursor:pointer;
+}
+
+.operai-edit-btn:hover{
+  background:rgba(255,255,255,0.12);
+}
+
+/* periodo con trattino */
+.operai-periodo{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.operai-periodo span{
+  opacity:0.5;
+}
+
+/* fix allineamento celle */
+.operai-table td{
+  vertical-align:middle;
+}
+
+/* intestazione seconda tabella */
+.operai-table.small th{
+  font-size:13px;
+  opacity:0.7;
+}
+
+/* ===== STORICO BUTTON ===== */
+
+.operai-storico-btn{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.05);
+  color:#fff;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+.operai-storico-btn:hover{
+  background:rgba(255,255,255,0.12);
+  transform:translateY(-1px);
+}

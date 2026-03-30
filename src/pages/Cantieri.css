@@ -1,0 +1,899 @@
+/* ===== Cantieri: master-detail pulito ===== */
+
+.cantieri-head{
+  display:flex;
+  gap:16px;
+  align-items:flex-start;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+
+/* ============================= */
+/* CREATE AREA */
+/* ============================= */
+
+.cantieri-create{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.input{
+  width: 220px;
+  max-width: 100%;
+  padding: 10px 12px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+
+  background: rgba(255,255,255,.06);
+  color: inherit;
+
+  transition: all .15s ease;
+}
+
+.input:focus{
+  outline:none;
+  border:1px solid rgba(251,191,36,.6);
+  box-shadow:0 0 0 2px rgba(251,191,36,.15);
+}
+
+.select{
+  padding: 10px 12px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+
+  background: rgba(255,255,255,.06);
+  color: inherit;
+
+  transition: all .15s ease;
+}
+
+.select:focus{
+  outline:none;
+  border:1px solid rgba(251,191,36,.6);
+}
+
+.select.small{
+  padding: 9px 10px;
+  min-width: 130px;
+}
+
+/* ============================= */
+/* LAYOUT */
+/* ============================= */
+
+.cantieri-layout{
+  display:grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* ============================= */
+/* LISTA CANTIERI (SINISTRA) */
+/* ============================= */
+
+.cantieri-left{
+  border: 1px solid rgba(255,255,255,.08);
+
+  background: linear-gradient(
+    180deg,
+    rgba(17,24,39,.95),
+    rgba(15,23,42,.95)
+  );
+
+  border-radius: 16px;
+
+  overflow:hidden;
+
+  box-shadow:
+  0 8px 25px rgba(0,0,0,.35);
+  box-shadow:
+  0 10px 30px rgba(0,0,0,.35),
+  inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.cantieri-filters{
+  padding: 14px;
+
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.cantieri-list{
+  max-height: 520px;
+  overflow:auto;
+}
+
+/* scrollbar moderna */
+
+.cantieri-list::-webkit-scrollbar{
+  width:6px;
+}
+
+.cantieri-list::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.15);
+  border-radius:6px;
+}
+
+/* ============================= */
+/* RIGA CANTIERE */
+/* ============================= */
+
+.cantiere-row{
+  width:100%;
+  text-align:left;
+
+  padding: 14px;
+
+  background: transparent;
+  border: none;
+
+  border-bottom: 1px solid rgba(255,255,255,.05);
+
+  cursor:pointer;
+
+  transition: all .15s ease;
+}
+
+.cantiere-row:hover{
+  background: rgba(255,255,255,.05);
+}
+
+.cantiere-row.active{
+
+  background: linear-gradient(
+    90deg,
+    rgba(251,191,36,.15),
+    rgba(251,191,36,.05)
+  );
+
+  border-left: 3px solid #fbbf24;
+
+}
+
+/* testo */
+
+.row-title{
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.row-sub{
+  font-size: 12px;
+  opacity: .75;
+}
+
+/* layout riga */
+
+.row-left{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.row-trash{
+  margin-left:auto;
+
+  background: transparent;
+
+  border: 1px solid rgba(255,255,255,.10);
+
+  border-radius: 10px;
+
+  padding: 6px 10px;
+
+  cursor:pointer;
+
+  opacity:.7;
+
+  transition: all .15s ease;
+}
+
+.row-trash:hover{
+  opacity: 1;
+  background: rgba(255,255,255,.06);
+}
+
+/* ============================= */
+/* DETTAGLIO CANTIERE */
+/* ============================= */
+
+.cantieri-right{
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  background:
+  radial-gradient(circle at top,
+  rgba(30,64,175,.25),
+  transparent 40%),
+
+  linear-gradient(
+  180deg,
+  rgba(17,24,39,.95),
+  rgba(15,23,42,.95)
+  );
+
+  border-radius: 16px;
+
+  padding: 16px;
+
+  box-shadow:
+  0 10px 30px rgba(0,0,0,.35),
+  inset 0 1px 0 rgba(255,255,255,.05);
+
+}
+
+/* ============================= */
+/* HEADER DETTAGLIO */
+/* ============================= */
+
+.detail-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.detail-kicker{
+  font-size: 12px;
+  opacity:.65;
+}
+
+.detail-name{
+  margin: 6px 0 4px;
+  font-size: 22px;
+  font-weight:700;
+}
+
+/* ============================= */
+/* 💎 KPI MODERNI (6 BOX PRO) */
+/* ============================= */
+
+.detail-cards{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:12px;
+  margin-top:14px;
+}
+
+/* card base */
+.mini-card{
+  position:relative;
+  padding:12px;
+  border-radius:16px;
+
+  border:1px solid rgba(255,255,255,.08);
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+
+  backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 6px 20px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.05);
+
+  transition: all .25s ease;
+  overflow:hidden;
+}
+
+/* glow effetto */
+.mini-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background: radial-gradient(circle at top left, rgba(251,191,36,0.15), transparent 60%);
+  opacity:0;
+  transition:.25s;
+}
+
+/* hover */
+.mini-card:hover{
+  transform: translateY(-4px) scale(1.01);
+  border:1px solid rgba(251,191,36,.35);
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.35),
+    0 0 15px rgba(251,191,36,.15);
+}
+
+.mini-card:hover::before{
+  opacity:1;
+}
+
+/* titolo */
+.mini-label{
+  font-size:10px; /* keep size but slightly stronger readability */
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  opacity:.6;
+  margin-bottom:6px;
+}
+
+/* valore principale */
+.mini-value{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:.3px;
+}
+
+/* testo secondario */
+.mini-sub{
+  margin-top:4px;
+  font-size:11px;
+  opacity:.7;
+  line-height:1.3;
+}
+
+/* icona top right */
+.mini-card::after{
+  content:"";
+  position:absolute;
+  top:10px;
+  right:12px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background: rgba(251,191,36,.6);
+  box-shadow:0 0 10px rgba(251,191,36,.6);
+}
+
+/* responsive */
+@media (max-width: 900px){
+  .detail-cards{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================= */
+/* GRIGLIA DETTAGLI */
+/* ============================= */
+
+.detail-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.detail-box{
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  background:
+  linear-gradient(
+    180deg,
+    rgba(255,255,255,.10),
+    rgba(255,255,255,.06)
+  );
+
+  border-radius: 16px;
+
+  padding: 16px;
+
+  box-shadow:
+    0 6px 20px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* shared card style */
+.card-unified{
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+  box-shadow:
+    0 6px 20px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.detail-box-title{
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+/* ============================= */
+/* LISTA COMPATTA */
+/* ============================= */
+
+.compact-list{
+  list-style:none;
+  padding:0;
+  margin:0;
+
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+}
+
+.compact-list li{
+
+  padding: 10px;
+
+  border-radius: 10px;
+
+  border: 1px solid rgba(255,255,255,.07);
+
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+
+  transition: all .15s ease;
+}
+
+.compact-list li:hover{
+  background: rgba(255,255,255,.07);
+}
+
+.dim{
+  opacity:.7;
+}
+
+/* ============================= */
+/* ACTION BUTTONS */
+/* ============================= */
+
+.detail-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.btn-danger{
+
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  border: 1px solid rgba(255,90,90,.35);
+
+  background: rgba(255,90,90,.12);
+
+  color: inherit;
+
+  cursor: pointer;
+
+  transition: all .15s ease;
+
+}
+
+.btn-danger:hover{
+
+  background: rgba(255,90,90,.22);
+
+  transform: translateY(-1px);
+
+}
+
+/* ============================= */
+/* MOBILE */
+/* ============================= */
+
+@media (max-width: 980px){
+
+  .cantieri-layout{
+    grid-template-columns: 1fr;
+  }
+
+  .detail-cards{
+    grid-template-columns: 1fr;
+  }
+
+  .detail-grid{
+    grid-template-columns: 1fr;
+  }
+
+}
+/* ===== FIX TESTO LISTA CANTIERI ===== */
+
+.cantieri-left{
+  color:#e5e7eb;
+}
+
+.cantiere-row{
+  color:#e5e7eb;
+}
+
+.cantiere-row .row-title{
+  color:#f9fafb;
+}
+
+.cantiere-row .row-sub{
+  color:#9ca3af;
+}
+
+.cantiere-row.active .row-title{
+  color:#fbbf24;
+}
+
+/* ===== MIGLIORIE UI MODERNE ===== */
+
+/* HEADER PIÙ PULITO */
+.detail-top{
+  align-items:center;
+}
+
+.detail-name{
+  font-size:26px;
+  letter-spacing:0.5px;
+}
+
+/* CARD PIÙ ELEGANTI */
+.mini-card{
+  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.05);
+}
+
+.mini-value{
+  font-size:24px;
+}
+
+/* BOX PIÙ LEGGIBILI */
+.detail-box{
+  backdrop-filter: blur(6px);
+  background: rgba(255,255,255,0.04);
+}
+
+/* LISTA PIÙ PULITA */
+.compact-list li{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:13px;
+}
+
+/* EFFETTO HOVER PIÙ MODERNO */
+.compact-list li:hover{
+  transform: translateX(4px);
+}
+
+/* SIDEBAR LISTA CANTIERI PIÙ BELLA */
+.cantiere-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.cantiere-row.active{
+  box-shadow: inset 0 0 20px rgba(251,191,36,.1);
+}
+
+/* INPUT PIÙ MODERNI */
+.input, .select{
+  backdrop-filter: blur(6px);
+}
+
+/* BOTTONE CREA */
+.btn-primary{
+  background: linear-gradient(135deg,#f59e0b,#fbbf24);
+  border:none;
+  color:#1e293b;
+  font-weight:700;
+}
+
+.btn-primary:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(251,191,36,.35);
+}
+
+/* RESPONSIVE MIGLIORE */
+@media (max-width: 768px){
+  .detail-name{
+    font-size:20px;
+  }
+
+  .mini-value{
+    font-size:18px;
+  }
+}
+/* ============================= */
+/* ✨ SIDEBAR PRO (FIXED) */
+/* ============================= */
+
+.cantieri-left{
+  backdrop-filter: blur(10px);
+}
+
+/* card cantiere */
+.cantiere-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  border-radius: 12px;
+  margin: 6px 8px;
+  padding: 12px;
+
+  transition: all .2s ease;
+}
+
+/* hover */
+.cantiere-row:hover{
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+  transform: translateX(4px);
+}
+
+/* attivo */
+.cantiere-row.active{
+  background: linear-gradient(
+    90deg,
+    rgba(251,191,36,0.18),
+    rgba(251,191,36,0.05)
+  );
+  border-left: 4px solid #fbbf24;
+  box-shadow: 0 6px 18px rgba(251,191,36,0.15);
+}
+
+/* titolo */
+.row-title{
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* badge base */
+.badge-status{
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* colori (⚠️ senza :contains che NON funziona) */
+.badge-attivo{
+  background: rgba(34,197,94,0.2);
+  color: #4ade80;
+}
+
+.badge-pausa{
+  background: rgba(251,191,36,0.2);
+  color: #facc15;
+}
+
+.badge-completato{
+  background: rgba(148,163,184,0.2);
+  color: #cbd5f5;
+}
+
+/* cestino */
+.row-trash{
+  opacity: 0;
+  transform: scale(.9);
+  transition: all .2s;
+}
+
+.cantiere-row:hover .row-trash{
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ============================= */
+/* 🚀 DETAIL CANTIERE PRO */
+/* ============================= */
+
+.detail-header-pro{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.status-badge{
+  display:inline-block;
+  margin-top:6px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  background: rgba(34,197,94,0.2);
+  color:#4ade80;
+}
+
+/* KPI */
+.kpi-row{
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.kpi-card{
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(6px);
+}
+
+.kpi-card span{
+  font-size:12px;
+  opacity:.7;
+}
+
+.kpi-card h3{
+  margin-top:6px;
+  font-size:22px;
+}
+
+/* TABELLA PRO */
+.table-pro{
+  margin-top:10px;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.table-header{
+  display:grid;
+  grid-template-columns: 120px 1fr 120px 140px 1fr;
+  padding:12px;
+  font-size:12px;
+  font-weight:700;
+  opacity:.7;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.table-row{
+  display:grid;
+  grid-template-columns: 120px 1fr 120px 140px 1fr;
+  padding:12px;
+  font-size:13px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  transition: all .15s ease;
+}
+
+.table-row:hover{
+  background: rgba(255,255,255,0.05);
+}
+
+.empty{
+  padding:16px;
+  text-align:center;
+  opacity:.6;
+}
+
+/* badge giornata */
+.badge{
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:11px;
+  font-weight:600;
+  text-align:center;
+}
+
+.badge.full{
+  background: rgba(34,197,94,0.2);
+  color:#4ade80;
+}
+
+.badge.half{
+  background: rgba(251,191,36,0.2);
+  color:#facc15;
+}
+.detail-name {
+  font-size: 24px;
+  font-weight: 800;
+}
+.badge-stato {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.mini-value {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.section-title {
+  margin-top: 20px;
+  font-size: 13px;
+  opacity: .6;
+  letter-spacing: 1px;
+}
+/* 🔥 FORCE UI IMPROVEMENT */
+
+.detail-name {
+  font-size: 28px !important;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.mini-value {
+  font-size: 18px !important;
+  font-weight: 800;
+}
+
+.detail-cards {
+  gap: 16px;
+}
+
+.mini-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.detail-box {
+  margin-top: 20px;
+  padding: 16px;
+}
+
+.table {
+  font-size: 13px;
+}
+
+.table th {
+  opacity: 0.6;
+  font-weight: 600;
+}
+/* ============================= */
+/* 🔥 FIX SIDEBAR BROKEN LAYOUT */
+/* ============================= */
+
+.cantieri-left{
+  display:flex;
+  flex-direction:column;
+}
+
+.cantieri-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:10px;
+}
+
+.cantiere-row{
+  width:100%;
+  display:flex;
+  flex-direction:row;
+  justify-content:space-between;
+  align-items:center;
+
+  padding:12px 14px;
+  border-radius:12px;
+
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.05);
+
+  margin:0; /* IMPORTANT FIX */
+}
+
+.row-left{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.row-title{
+  font-size:14px;
+  font-weight:700;
+}
+
+.row-sub{
+  font-size:11px;
+  opacity:.6;
+}
+
+.row-trash{
+  opacity:0;
+  transition:.2s;
+}
+
+.cantiere-row:hover .row-trash{
+  opacity:1;
+}
+
+/* 🚫 IMPORTANT: force vertical stacking */
+.cantieri-list *{
+  max-width:100%;
+}

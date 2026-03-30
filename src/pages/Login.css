@@ -1,0 +1,157 @@
+/* RESET E STILI BASE */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #020617; /* Sfondo nero profondo */
+  color: white;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* 1. SFONDO CON SFERE ACCESE E VISIBILI (Massima Saturazione) */
+.login-wrapper {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  /* Due sfere grandi, sature e ben definite ai bordi */
+  background: 
+    radial-gradient(circle at 12% 12%, rgba(251, 191, 36, 0.6) 0%, transparent 25%),
+    radial-gradient(circle at 88% 88%, rgba(59, 130, 246, 0.7) 0%, transparent 25%),
+    #020617;
+}
+
+/* 2. CARD VETRATA SCURA E DEFINITA */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 60px 45px;
+  border-radius: 28px;
+  background: rgba(10, 20, 40, 0.8); /* Vetro scuro per contrasto */
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.12); /* Bordo definito */
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  z-index: 10;
+  position: relative;
+}
+
+/* 3. LOGO LED SUPER LUMINOSO */
+.logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 35px;
+}
+
+.logo-box-led {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #020617;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 26px;
+  /* Effetto LED acceso al massimo */
+  box-shadow: 
+    0 0 20px rgba(251, 191, 36, 0.8),
+    0 0 40px rgba(251, 191, 36, 0.6);
+  animation: ledGlow 1.5s infinite alternate;
+}
+
+@keyframes ledGlow {
+  0% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8), 0 0 40px rgba(251, 191, 36, 0.6); }
+  100% { box-shadow: 0 0 30px rgba(251, 191, 36, 1), 0 0 60px rgba(251, 191, 36, 0.8); }
+}
+
+.logo-text { text-align: left; }
+.brand-name { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+.brand-sub { font-size: 11px; color: #fbbf24; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+
+/* 4. FORM */
+.login-form { display: flex; flex-direction: column; gap: 20px; }
+
+.input-group input {
+  width: 100%;
+  padding: 18px 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.input-group input:focus {
+  border-color: #fbbf24;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.15);
+}
+
+.pwd-container { position: relative; }
+.pwd-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.8);
+  font-size: 18px;
+  padding: 8px;
+}
+
+/* ERRORE CHIANRO */
+.login-error-msg {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* 5. PULSANTE ENERGETICO GRADIENTE */
+.login-btn {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  color: #020617;
+  padding: 18px;
+  border-radius: 16px;
+  border: none;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(251, 191, 36, 0.5);
+}
+
+.login-btn:active:not(:disabled) { transform: translateY(0); scale: 0.98; }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.login-footer { margin-top: 40px; font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 1px; }
+
+/* ANIMAZIONE INGRESSO */
+.animate-in {
+  animation: slideIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
