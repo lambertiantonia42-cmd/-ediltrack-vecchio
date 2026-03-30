@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 
-
 export default function DashboardLayout({ children }) {
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -40,10 +39,10 @@ export default function DashboardLayout({ children }) {
             zIndex: 1000,
           }}
         >
-          <Sidebar />
+          <div style={{ padding: 20, color: "white" }}>MENU</div>
         </div>
         <div style={{ flex: 1, marginLeft: isMobile ? 0 : 260 }}>
-          <Header>
+          <div style={{ padding: 10, background: "#0b1220" }}>
             {isMobile && (
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
@@ -58,7 +57,7 @@ export default function DashboardLayout({ children }) {
                 ☰
               </button>
             )}
-          </Header>
+          </div>
           <main>{children}</main>
         </div>
       </div>
