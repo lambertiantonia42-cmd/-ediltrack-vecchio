@@ -30,6 +30,15 @@ export default function DashboardLayout() {
     return () => clearInterval(interval);
   }, []);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const hour = now.getHours();
   let saluto = "Buongiorno";
   let salutoColor = "#fbbf24"; 
@@ -192,7 +201,14 @@ export default function DashboardLayout() {
       `}</style>
 
       {/* SIDEBAR */}
-      <aside className="sidebar">
+      <aside className="sidebar" style={{
+        position: isMobile ? "fixed" : "relative",
+        left: isMobile && !menuOpen ? "-320px" : "0",
+        top: 0,
+        height: "100vh",
+        zIndex: 1000,
+        transition: "0.3s"
+      }}>
         <div className="brand">
           <div className="brand-icon">V</div>
           <div className="brand-text">
@@ -229,10 +245,40 @@ export default function DashboardLayout() {
         </div>
       </aside>
 
+      {isMobile && menuOpen && (
+        <div
+          onClick={() => setMenuOpen(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 999
+          }}
+        />
+      )}
+
       {/* CONTENUTO PRINCIPALE */}
       <main className="content" style={{ flex: 1, overflowY: "auto", background: "#0b1220" }}>
         <header className="topbar">
           <div>
+            {isMobile && (
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                style={{
+                  fontSize: 24,
+                  background: "transparent",
+                  border: "none",
+                  color: "white",
+                  marginBottom: 10,
+                  cursor: "pointer"
+                }}
+              >
+                ☰
+              </button>
+            )}
             <h1>
               <span style={{ 
                 background: `linear-gradient(90deg, ${userColor}, #ffffff)`, 
