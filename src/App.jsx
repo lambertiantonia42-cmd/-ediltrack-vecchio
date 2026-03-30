@@ -1,66 +1,45 @@
-import { useState, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
+import RequireAuth from "./components/RequireAuth";
+import DashboardLayout from "./pages/Dashboard";
+import DashboardHome from "./pages/DashboardHome";
+import Presenze from "./pages/Presenze";
+import Spese from "./pages/Spese";
+import Cantieri from "./pages/Cantieri";
+import Cronologia from "./pages/Cronologia";
+import Login from "./pages/Login";
+import Conteggi from "./pages/Conteggi";
+import SchedaOperaio from "./pages/SchedaOperaio";
+import Operai from "./pages/Operai";
+import StoricoOperaio from "./pages/storicoOperaio";
+import SnapshotOperaio from "./pages/snapshot-operaio";
 
-export default function DashboardLayout({ children }) {
-
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
+export default function App() {
   return (
     <>
-      {isMobile && menuOpen && (
-        <div
-          onClick={() => setMenuOpen(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.4)",
-            zIndex: 999
-          }}
-        />
-      )}
-      <div style={{ display: "flex" }}>
-        <div
-          style={{
-            position: isMobile ? "fixed" : "relative",
-            left: isMobile && !menuOpen ? "-260px" : "0",
-            top: 0,
-            height: "100vh",
-            width: 260,
-            transition: "0.3s",
-            zIndex: 1000,
-          }}
-        >
-          <div style={{ padding: 20, color: "white" }}>MENU</div>
-        </div>
-        <div style={{ flex: 1, marginLeft: isMobile ? 0 : 260 }}>
-          <div style={{ padding: 10, background: "#0b1220" }}>
-            {isMobile && (
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                style={{
-                  fontSize: 22,
-                  background: "transparent",
-                  border: "none",
-                  color: "white",
-                  marginRight: 10
-                }}
-              >
-                ☰
-              </button>
-            )}
-          </div>
-          <main>{children}</main>
-        </div>
-      </div>
+      <Routes>
+
+      {/* ROUTA PUBBLICA */}
+      <Route path="/login" element={<Login />} />
+
+      {/* ROUTE PROTETTE */}
+      <Route element={<RequireAuth />}>
+        <Route element={<DashboardLayout />}>
+
+          <Route path="/" element={<DashboardHome />} />
+          <Route path="/presenze" element={<Presenze />} />
+          <Route path="/spese" element={<Spese />} />
+          <Route path="/cantieri" element={<Cantieri />} />
+          <Route path="/cronologia" element={<Cronologia />} />
+
+          <Route path="/conteggi" element={<Conteggi />} />
+          <Route path="/conteggi/:nome" element={<SchedaOperaio />} />
+          <Route path="/storico-operaio" element={<StoricoOperaio />} />
+          <Route path="/operai" element={<Operai />} />
+          <Route path="/snapshot-operaio" element={<SnapshotOperaio />} />
+        </Route>
+      </Route>
+
+    </Routes>
     </>
   );
 }

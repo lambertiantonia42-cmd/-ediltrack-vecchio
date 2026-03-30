@@ -207,7 +207,8 @@ export default function DashboardLayout() {
         top: 0,
         height: "100vh",
         zIndex: 1000,
-        transition: "0.3s"
+        transition: "0.3s",
+        boxShadow: isMobile && menuOpen ? "0 0 40px rgba(0,0,0,0.6)" : "none",
       }}>
         <div className="brand">
           <div className="brand-icon">V</div>
@@ -262,7 +263,13 @@ export default function DashboardLayout() {
 
       {/* CONTENUTO PRINCIPALE */}
       <main className="content" style={{ flex: 1, overflowY: "auto", background: "#0b1220" }}>
-        <header className="topbar">
+        <header
+          className="topbar"
+          style={{
+            position: isMobile ? "relative" : "sticky",
+            top: isMobile ? "auto" : 0
+          }}
+        >
           <div>
             {isMobile && (
               <button
@@ -273,7 +280,8 @@ export default function DashboardLayout() {
                   border: "none",
                   color: "white",
                   marginBottom: 10,
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  zIndex: 2001,
                 }}
               >
                 ☰
