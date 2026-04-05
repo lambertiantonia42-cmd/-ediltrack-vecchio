@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { useState, useEffect } from "react";
@@ -16,7 +16,7 @@ export default function DashboardLayout() {
 
   const userColors = {
     giuseppe: "#fbbf24", // oro
-    adele: "#60a5fa",    // blu
+    adele: "#ec4899",    // fucsia
     giupy: "#34d399"     // verde
   };
 
@@ -38,6 +38,14 @@ export default function DashboardLayout() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (isMobile) {
+      setMenuOpen(false);
+    }
+  }, [location]);
 
   const hour = now.getHours();
   let saluto = "Buongiorno";
@@ -198,6 +206,36 @@ export default function DashboardLayout() {
           align-items: center;
           gap: 10px;
         }
+
+        /* ===== MOBILE FIX SAFE ===== */
+        @media (max-width: 768px) {
+          .topbar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 20px;
+          }
+
+          .topbar h1 {
+            font-size: 34px !important;
+            line-height: 1.1;
+          }
+
+          .subtitle {
+            font-size: 16px;
+          }
+
+          .date-colored {
+            width: 100%;
+            justify-content: center;
+            font-size: 16px;
+            padding: 10px 16px;
+          }
+
+          .page-content {
+            padding: 20px !important;
+          }
+        }
       `}</style>
 
       {/* SIDEBAR */}
@@ -219,23 +257,55 @@ export default function DashboardLayout() {
         </div>
 
         <nav className="nav">
-          <NavLink to="/" end className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
+          <NavLink
+            to="/"
+            end
+            onClick={() => isMobile && setMenuOpen(false)}
+            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+          >
             <span>🏠</span> Dashboard
           </NavLink>
-          <NavLink to="/presenze" className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
+          <NavLink
+            to="/presenze"
+            onClick={() => isMobile && setMenuOpen(false)}
+            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+          >
             <span>📒</span> Presenze
           </NavLink>
-          <NavLink to="/spese" className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
+          <NavLink
+            to="/spese"
+            onClick={() => isMobile && setMenuOpen(false)}
+            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+          >
             <span>💶</span> Spese
           </NavLink>
-          <NavLink to="/cantieri" className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
+          <NavLink
+            to="/cantieri"
+            onClick={() => isMobile && setMenuOpen(false)}
+            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+          >
             <span>🏗️</span> Cantieri
           </NavLink>
-          <NavLink to="/conteggi" className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
+          <NavLink
+            to="/conteggi"
+            onClick={() => isMobile && setMenuOpen(false)}
+            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+          >
             <span>💰</span> Conteggi
           </NavLink>
-          <NavLink to="/operai" className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
+          <NavLink
+            to="/operai"
+            onClick={() => isMobile && setMenuOpen(false)}
+            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+          >
             <span>👷</span> Operai
+          </NavLink>
+          <NavLink
+            to="/riepilogo"
+            onClick={() => isMobile && setMenuOpen(false)}
+            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+          >
+            <span>🧾</span> Riepilogo Mensile
           </NavLink>
         </nav>
 
@@ -287,15 +357,36 @@ export default function DashboardLayout() {
                 ☰
               </button>
             )}
-            <h1>
-              <span style={{ 
-                background: `linear-gradient(90deg, ${userColor}, #ffffff)`, 
-                WebkitBackgroundClip: "text", 
-                WebkitTextFillColor: "transparent",
-                textShadow: `0 0 25px ${userColor}`
-              }}>
-                {saluto}
-              </span>, <span style={{ color: userColor, fontWeight: 900 }}>{name}</span> 👋
+            <h1 style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "6px" }}>
+                <span
+                  style={{
+                    ...(isMobile
+                      ? {
+                          color: userColor,
+                          textShadow: `0 0 10px ${userColor}`
+                        }
+                      : {
+                          background: `linear-gradient(90deg, ${userColor}, #ffffff)`,
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          textShadow: `0 0 25px ${userColor}`
+                        })
+                  }}
+                >
+                  {saluto},
+                </span>
+
+                <span
+                  style={{
+                    color: userColor,
+                    fontWeight: 900
+                  }}
+                >
+                  {name}
+                </span>
+                <span style={{ marginLeft: "6px" }}>👋</span>
+              </div>
             </h1>
             <p className="subtitle">
               Sono le ore {now.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}

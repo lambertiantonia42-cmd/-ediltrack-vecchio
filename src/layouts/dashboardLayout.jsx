@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { useState, useEffect } from "react";
@@ -10,6 +10,7 @@ const MENU_ITEMS = [
   { path: "/cantieri", label: "Gestione Cantieri", icon: "🏗️" },
   { path: "/operai", label: "Anagrafica Operai", icon: "👷" },
   { path: "/conteggi", label: "Conteggi & Saldi", icon: "💰" },
+  { path: "/riepilogo", label: "Riepilogo Mensile", icon: "🧾" },
 ];
 
 function getFirstNameFromEmail(email = "") {
@@ -20,6 +21,7 @@ function getFirstNameFromEmail(email = "") {
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const email = auth.currentUser?.email || "";
   const name = getFirstNameFromEmail(email);
 
@@ -47,11 +49,17 @@ export default function DashboardLayout() {
 
   const diffMins = Math.floor((new Date() - new Date().setHours(sessionStart.split(":")[0], sessionStart.split(":")[1])) / 60000);
 
+  const isFixedTopbar = ["/cantieri", "/presenze", "/conteggi"].includes(location.pathname);
+
   return (
     <div className="app-shell">
       <style>{`
         /* --- RESET E BASE --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+          height: 100%;
+          overflow: hidden;
+        }
         
         .app-shell {
           display: flex;
@@ -170,9 +178,10 @@ export default function DashboardLayout() {
           flex: 1;
           display: flex;
           flex-direction: column;
-          overflow-y: auto;
+          overflow: hidden;
           background: #020617;
           position: relative;
+          height: 100vh;
         }
 
         .topbar {
@@ -180,11 +189,9 @@ export default function DashboardLayout() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          position: sticky;
-          top: 0;
           background: rgba(2, 6, 23, 0.85);
           backdrop-filter: blur(20px);
-          z-index: 50;
+          z-index: 999;
           border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
@@ -245,6 +252,7 @@ export default function DashboardLayout() {
           max-width: 1600px;
           width: 100%;
           margin: 0 auto;
+          margin-top: ${isFixedTopbar ? "100px" : "0"};
         }
       `}</style>
 
@@ -279,7 +287,16 @@ export default function DashboardLayout() {
 
       {/* CONTENUTO */}
       <main className="main-content">
-        <header className="topbar">
+        <header
+          className="topbar"
+          style={{
+            position: isFixedTopbar ? "fixed" : "sticky",
+            top: 0,
+            left: isFixedTopbar ? "280px" : "auto",
+            width: isFixedTopbar ? "calc(100% - 280px)" : "auto",
+            zIndex: 9999
+          }}
+        >
           <div className="saluto-box">
             <h1>
               <span style={{ color: salutoColor, textShadow: `0 0 30px ${salutoColor}55` }}>{saluto}</span>, {name} 👋

@@ -23,6 +23,9 @@ export default function Conteggi() {
   const [descrizione, setDescrizione] = useState("");
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [tipoPagamento, setTipoPagamento] = useState("Acconto");
+  const [meseSelezionato, setMeseSelezionato] = useState(
+    new Date().toISOString().slice(0,7) // YYYY-MM
+  );
 
   useEffect(() => {
     const qO = query(collection(db, "operai"), where("aziendaId", "==", AZIENDA_ID));
@@ -34,19 +37,33 @@ export default function Conteggi() {
     return () => { unsubO(); unsubP(); unsubA(); };
   }, []);
 
+  function getMese(dataStr){
+    if(!dataStr) return "";
+    return dataStr.slice(0,7);
+  }
+
   const dati = useMemo(() => {
     return operai
       .filter(o => o.stato !== "cessato")
       .map(o => {
         const nome = o.nome;
-        const presenzeOp = presenze.filter(p => p.dipendente === nome);
+        const presenzeOp = presenze.filter(p =>
+          p.dipendente === nome && getMese(p.data) === meseSelezionato
+        );
         const ggI = presenzeOp.filter(p => Number(p.giornata) === 1).length;
         const ggM = presenzeOp.filter(p => Number(p.giornata) === 0.5).length;
         const guadagno = (ggI * (o.pagaGiornaliera || 0)) + (ggM * ((o.pagaGiornaliera || 0) / 2));
-        const pagato = acconti.filter(a => a.dipendente === nome).reduce((sum, a) => sum + Number(a.importo || 0), 0);
+        const pagato = acconti
+          .filter(a =>
+            a.dipendente === nome &&
+            (a.meseCompetenza
+              ? a.meseCompetenza === meseSelezionato
+              : getMese(a.data) === meseSelezionato)
+          )
+          .reduce((sum, a) => sum + Number(a.importo || 0), 0);
         return { id: o.id, nome, giorni: ggI + (ggM * 0.5), guadagno, acconti: pagato, saldo: guadagno - pagato };
       });
-  }, [operai, presenze, acconti]);
+  }, [operai, presenze, acconti, meseSelezionato]);
 
   async function salvaAcconto() {
     if (!importo || !operaioSel) return;
@@ -58,6 +75,7 @@ export default function Conteggi() {
       tipo: tipoPagamento.toLowerCase(),
       descrizione: descrizione || "",
       data: data,
+      meseCompetenza: meseSelezionato,
       createdAt: serverTimestamp()
     });
     console.log("Acconto salvato:", {
@@ -221,6 +239,129 @@ export default function Conteggi() {
         .toggle-box button.active { background: #fbbf24; color: #000; }
 
         input { background: #0f172a; border: 1px solid #334155; color: #fff; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; margin-bottom: 10px; }
+
+        /* MOBILE FIX */
+        @media (max-width: 768px) {
+
+          .list-header {
+            display: none;
+          }
+
+          .list-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            padding: 16px;
+          }
+
+          .list-row > div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+          }
+
+          .list-row > div:first-child {
+            justify-content: flex-start;
+            gap: 10px;
+          }
+
+          .list-row span {
+            font-size: 14px !important;
+          }
+
+          .saldo-tag {
+            font-size: 12px;
+            padding: 4px 8px;
+          }
+
+          .btn-table,
+          .btn-pay {
+            font-size: 12px;
+            padding: 6px 10px;
+          }
+
+          /* LABELS MOBILE */
+          .list-row {
+            gap: 12px;
+          }
+
+          .list-row > div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
+          /* Giorni lavorati */
+          .list-row > div:nth-child(2)::before {
+            content: "Giorni lavorati:";
+            font-weight: 600;
+            color: #94a3b8;
+          }
+
+          /* Guadagno */
+          .list-row > div:nth-child(3)::before {
+            content: "Guadagno:";
+            font-weight: 600;
+            color: #94a3b8;
+          }
+
+          /* Pagati */
+          .list-row > div:nth-child(4)::before {
+            content: "Pagati:";
+            font-weight: 600;
+            color: #94a3b8;
+          }
+
+          /* Da saldare */
+          .list-row > div:nth-child(5)::before {
+            content: "Da saldare:";
+            font-weight: 600;
+            color: #94a3b8;
+          }
+
+          /* Spazio tra label e valore */
+          .list-row > div::before {
+            margin-right: 10px;
+          }
+        }
+
+        .month-bar {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 20px;
+          flex-wrap: wrap;
+        }
+
+        .month-btn {
+          padding: 8px 12px;
+          border-radius: 10px;
+          border: 1px solid #334155;
+          background: #0f172a;
+          color: #94a3b8;
+          cursor: pointer;
+          font-size: 13px;
+        }
+
+        .month-btn.active {
+          background: #fbbf24;
+          color: #000;
+          font-weight: 700;
+        }
+
+        .mobile-month {
+          display: none;
+        }
+
+        @media (max-width: 768px) {
+          .month-bar {
+            display: none;
+          }
+
+          .mobile-month {
+            display: block;
+            margin-bottom: 20px;
+          }
+        }
       `}</style>
 
       <div className="header-dash">
@@ -228,6 +369,38 @@ export default function Conteggi() {
         <p style={{ color: "#94a3b8", fontSize: "14px", marginTop: "5px" }}>Situazione economica aggiornata al {new Date().toLocaleDateString('it-IT')}</p>
       </div>
 
+      {/* MOBILE */}
+      <div className="mobile-month">
+        <input
+          type="month"
+          value={meseSelezionato}
+          onChange={e => setMeseSelezionato(e.target.value)}
+        />
+      </div>
+
+      {/* DESKTOP */}
+      <div className="month-bar">
+        {[
+          "01","02","03","04","05","06",
+          "07","08","09","10","11","12"
+        ].map(m => {
+          const anno = new Date().getFullYear();
+          const value = `${anno}-${m}`;
+          const mesi = [
+            "Gen","Feb","Mar","Apr","Mag","Giu",
+            "Lug","Ago","Set","Ott","Nov","Dic"
+          ];
+          return (
+            <button
+              key={m}
+              className={`month-btn ${meseSelezionato === value ? "active" : ""}`}
+              onClick={() => setMeseSelezionato(value)}
+            >
+              {mesi[Number(m)-1]}
+            </button>
+          );
+        })}
+      </div>
 
       <div className="list-box">
         <div className="list-header">

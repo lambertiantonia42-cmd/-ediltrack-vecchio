@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import RequireAuth from "./components/RequireAuth";
-import DashboardLayout from "./pages/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import DashboardHome from "./pages/DashboardHome";
 import Presenze from "./pages/Presenze";
 import Spese from "./pages/Spese";
@@ -12,36 +12,26 @@ import SchedaOperaio from "./pages/SchedaOperaio";
 import Operai from "./pages/Operai";
 import StoricoOperaio from "./pages/storicoOperaio";
 import SnapshotOperaio from "./pages/snapshot-operaio";
-import RiepilogoMensile from "./pages/RiepilogoMensile";
 
 export default function App() {
   return (
-    <>
-      <Routes>
-
-      {/* ROUTA PUBBLICA */}
+    <Routes>
       <Route path="/login" element={<Login />} />
 
-      {/* ROUTE PROTETTE */}
       <Route element={<RequireAuth />}>
-        <Route element={<DashboardLayout />}>
-
+        <Route element={<Dashboard />}>
           <Route path="/" element={<DashboardHome />} />
           <Route path="/presenze" element={<Presenze />} />
           <Route path="/spese" element={<Spese />} />
           <Route path="/cantieri" element={<Cantieri />} />
           <Route path="/cronologia" element={<Cronologia />} />
-
           <Route path="/conteggi" element={<Conteggi />} />
           <Route path="/conteggi/:nome" element={<SchedaOperaio />} />
-          <Route path="/storico-operaio" element={<StoricoOperaio />} />
           <Route path="/operai" element={<Operai />} />
+          <Route path="/storico-operaio" element={<StoricoOperaio />} />
           <Route path="/snapshot-operaio" element={<SnapshotOperaio />} />
-          <Route path="/riepilogo" element={<RiepilogoMensile />} />
         </Route>
       </Route>
-
     </Routes>
-    </>
   );
 }

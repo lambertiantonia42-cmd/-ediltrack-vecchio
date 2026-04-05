@@ -23,6 +23,9 @@ export default function SchedaOperaio() {
   const [operaio, setOperaio] = useState(null);
   const [paga, setPaga] = useState("");
   const [filtroEvento, setFiltroEvento] = useState("tutti");
+  const [meseSelezionato, setMeseSelezionato] = useState(
+    new Date().toISOString().slice(0,7)
+  );
 
   function colorFromString(str) {
     let hash = 0;
@@ -30,7 +33,7 @@ export default function SchedaOperaio() {
       hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
     const h = Math.abs(hash) % 360;
-    return `hsl(${h}, 70%, 45%)`;
+    return `hsl(${h}, 60%, 70%)`;
   }
 
   useEffect(() => {
@@ -65,22 +68,72 @@ export default function SchedaOperaio() {
     return () => { unsubOp(); unsubPre(); unsubAcc(); unsubAss(); };
   }, [nomeOperaio]);
 
-  const giorniInteri = useMemo(() => presenze.filter(p => Number(p.giornata) === 1).length, [presenze]);
-  const giorniMezzi = useMemo(() => presenze.filter(p => Number(p.giornata) === 0.5).length, [presenze]);
+  function getMese(dataStr){
+    if(!dataStr) return "";
+    return dataStr.slice(0,7);
+  }
+
+  const presenzeFiltrate = useMemo(() => 
+    presenze.filter(p => getMese(p.data) === meseSelezionato),
+    [presenze, meseSelezionato]
+  );
+
+  const presenzeRaggruppate = useMemo(() => {
+    const map = {};
+
+    presenzeFiltrate.forEach(p => {
+      if (!map[p.data]) {
+        map[p.data] = {
+          data: p.data,
+          cantieri: [],
+          giornate: []
+        };
+      }
+
+      map[p.data].cantieri.push(p.cantiere);
+      map[p.data].giornate.push(Number(p.giornata));
+    });
+
+    return Object.values(map).map(g => {
+      const totale = g.giornate.reduce((sum, val) => sum + val, 0);
+      return {
+        ...g,
+        giornataFinale: totale >= 1 ? 1 : 0.5
+      };
+    }).sort((a,b) => b.data.localeCompare(a.data));
+  }, [presenzeFiltrate]);
+
+  const giorniInteri = useMemo(() => presenzeFiltrate.filter(p => Number(p.giornata) === 1).length, [presenzeFiltrate]);
+  const giorniMezzi = useMemo(() => presenzeFiltrate.filter(p => Number(p.giornata) === 0.5).length, [presenzeFiltrate]);
   const pagaNumero = Number(paga || 0);
   const guadagno = useMemo(() => giorniInteri * pagaNumero + giorniMezzi * (pagaNumero / 2), [giorniInteri, giorniMezzi, pagaNumero]);
-  const totaleAcconti = useMemo(() => acconti.reduce((sum, a) => sum + Number(a.importo || 0), 0), [acconti]);
+  const totaleAcconti = useMemo(() => 
+    acconti
+      .filter(a =>
+        (a.meseCompetenza
+          ? a.meseCompetenza === meseSelezionato
+          : getMese(a.data) === meseSelezionato)
+      )
+      .reduce((sum, a) => sum + Number(a.importo || 0), 0),
+    [acconti, meseSelezionato]
+  );
   const saldo = guadagno - totaleAcconti;
 
   const eventi = useMemo(() => {
     const list = [
-      ...acconti.map(a => ({ 
-        tipo: a.tipo || a.tipoPagamento || "acconto", 
-        data: a.data, 
-        importo: Number(a.importo || 0), 
-        nota: a.nota || a.descrizione || "",
-        id: a.id 
-      })),
+      ...acconti
+        .filter(a =>
+          (a.meseCompetenza
+            ? a.meseCompetenza === meseSelezionato
+            : getMese(a.data) === meseSelezionato)
+        )
+        .map(a => ({ 
+          tipo: a.tipo || a.tipoPagamento || "acconto", 
+          data: a.data, 
+          importo: Number(a.importo || 0), 
+          nota: a.nota || a.descrizione || "",
+          id: a.id 
+        })),
       ...assenze.map(ass => ({ tipo: "assenza", stato: ass.tipo, da: ass.inizio, a: ass.fine, id: ass.id }))
     ];
     const sorted = list.sort((a, b) => (b.data || b.da || "").localeCompare(a.data || a.da || ""));
@@ -92,7 +145,7 @@ export default function SchedaOperaio() {
       if (filtroEvento === "ferie") return e.tipo === "assenza" && e.stato?.toLowerCase() === "ferie";
       return true;
     });
-  }, [acconti, assenze, filtroEvento]);
+  }, [acconti, assenze, filtroEvento, meseSelezionato]);
 
   async function salvaPaga() {
     if (!operaio) return;
@@ -114,6 +167,29 @@ export default function SchedaOperaio() {
   function formatDate(data) {
     if (!data) return "-";
     return data.split("-").reverse().join("/");
+  }
+
+  const mesi = [
+    { label: "Gen", val: "01" },
+    { label: "Feb", val: "02" },
+    { label: "Mar", val: "03" },
+    { label: "Apr", val: "04" },
+    { label: "Mag", val: "05" },
+    { label: "Giu", val: "06" },
+    { label: "Lug", val: "07" },
+    { label: "Ago", val: "08" },
+    { label: "Set", val: "09" },
+    { label: "Ott", val: "10" },
+    { label: "Nov", val: "11" },
+    { label: "Dic", val: "12" }
+  ];
+
+  const annoCorrente = new Date().getFullYear();
+
+  // 🚫 nascondi operai cessati
+  if (operaio && operaio.stato === "Cessato") {
+    navigate(-1);
+    return null;
   }
 
   return (
@@ -141,6 +217,32 @@ export default function SchedaOperaio() {
         </div>
       </div>
 
+      <div style={{ marginBottom: "20px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+        {mesi.map(m => {
+          const valore = `${annoCorrente}-${m.val}`;
+          const active = meseSelezionato === valore;
+
+          return (
+            <button
+              key={m.val}
+              onClick={() => setMeseSelezionato(valore)}
+              style={{
+                padding: "8px 14px",
+                borderRadius: "10px",
+                border: active ? "2px solid #f0b90b" : "1px solid rgba(255,255,255,0.1)",
+                background: active ? "rgba(251,191,36,0.2)" : "var(--bg-card)",
+                color: active ? "#fbbf24" : "var(--text-main)",
+                cursor: "pointer",
+                fontWeight: "600",
+                fontSize: "13px"
+              }}
+            >
+              {m.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* RIEPILOGO STATS */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px", marginBottom: "30px" }}>
         <StatBox label="GIORNATE TOTALI" value={`${giorniInteri + giorniMezzi * 0.5} gg`} sub={`${giorniInteri} intere / ${giorniMezzi} mezze`} color="var(--text-main)" />
@@ -164,16 +266,24 @@ export default function SchedaOperaio() {
               </tr>
             </thead>
             <tbody>
-              {presenze.map(p => (
-                <tr key={p.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              {presenzeRaggruppate.map((p, idx) => (
+                <tr key={idx} style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                   <td style={{ padding: "12px", fontWeight: "bold", color: "var(--text-main)" }}>{formatDate(p.data)}</td>
                   <td style={{ padding: "12px" }}>
-                    <span style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: "bold", background: "rgba(0,0,0,0.03)", color: colorFromString(p.cantiere || ""), border: `1px solid ${colorFromString(p.cantiere || "")}33` }}>
-                      {(p.cantiere || "N/D").toUpperCase()}
-                    </span>
+                    <div style={{ display:"flex", flexDirection:"column", gap:"4px" }}>
+                      {p.cantieri.map((c,i) => (
+                        <div key={i} style={{
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          color: colorFromString(c || "")
+                        }}>
+                          • {(c || "N/D").toUpperCase()}
+                        </div>
+                      ))}
+                    </div>
                   </td>
-                  <td style={{ padding: "12px", color: "var(--text-main)" }}>{Number(p.giornata) === 1 ? "Intera" : "Mezza"}</td>
-                  <td style={{ padding: "12px", fontWeight: "bold", color: "var(--text-main)" }}>€ {(Number(p.giornata) * pagaNumero).toFixed(2)}</td>
+                  <td style={{ padding: "12px", color: "var(--text-main)" }}>{p.giornataFinale === 1 ? "Intera" : "Mezza"}</td>
+                  <td style={{ padding: "12px", fontWeight: "bold", color: "var(--text-main)" }}>€ {(p.giornataFinale * pagaNumero).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -221,7 +331,7 @@ export default function SchedaOperaio() {
                 borderLeft: `5px solid ${isAssenza ? (tipoAss === "malattia" ? "#ef4444" : "#00c2ff") : "#22c55e"}`
               }}>
                 <div>
-                  <div style={{ fontSize: "11px", color: "#666" }}>{isAssenza ? `${formatDate(e.da)} → ${formatDate(e.a) || 'In corso'}` : formatDate(e.data)}</div>
+                  <div style={{ fontSize: "15px", fontWeight: "600", color: "#9ca3af" }}>{isAssenza ? `${formatDate(e.da)} → ${formatDate(e.a) || 'In corso'}` : formatDate(e.data)}</div>
                   <b style={{ fontSize: "14px", color: "var(--text-main)" }}>
                     {isAssenza 
                       ? (tipoAss === "malattia" ? "🤒 MALATTIA" : "🏖️ FERIE")

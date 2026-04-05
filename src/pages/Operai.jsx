@@ -464,9 +464,9 @@ Aggiungi
 }}>
 
 <h3 style={{marginBottom:"15px"}}>📋 Operai attivi</h3>
-<table className="operai-table" style={{tableLayout:"fixed", width:"100%"}}>
+<table className="operai-table" style={{tableLayout:"auto", width:"100%", minWidth:"650px"}}>
 
-<thead>
+<thead className="desktop-only">
 
 <tr>
   <th style={{width:"22%", textAlign:"left"}}>Operaio</th>
@@ -483,240 +483,322 @@ Aggiungi
 
 {operai.filter(o=>o.stato!=="cessato").map(o=>{
   return (
-
-<tr key={o.id} style={{
-  height:64,
-  borderBottom:"1px solid #e2e8f0",
-  transition:"background 0.2s"
-}}
-onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.05)"}
-onMouseLeave={e=>e.currentTarget.style.background="transparent"}
->
-
-<td style={{
-  whiteSpace:"nowrap",
-  padding:"12px 6px",
-}}>
-  <span style={{
-    whiteSpace:"nowrap",
-    fontWeight:600,
-    fontSize:18,
-    color:"#f8fafc",
-    letterSpacing:0.3
-  }}>
-    👷 {o.nome}
-  </span>
-</td>
-
-<td style={{padding:"12px 6px"}}>
-  <div style={{display:"flex", alignItems:"center", gap:6, whiteSpace:"nowrap"}}>
-    <span style={{fontWeight:500}}>€ {o.pagaGiornaliera || 0}</span>
-    <button
-      className="btn-ghost"
-      style={{padding:"4px 6px", fontSize:12}}
-      onClick={()=>{
-        const nuova = prompt("Nuova paga giornaliera:", o.pagaGiornaliera);
-        if(nuova!==null){
-          modificaPaga(o.id, nuova);
-        }
+    <>
+      {/* DESKTOP ROW */}
+      <tr key={o.id} className="desktop-only" style={{
+        height:64,
+        borderBottom:"1px solid #e2e8f0",
+        transition:"background 0.2s"
       }}
-    >
-      ✏️
-    </button>
-  </div>
-</td>
-
-<td style={{padding:"12px 6px"}}>
-<select
-value={o.stato || "attivo"}
-disabled={(o.stato==="malattia" || o.stato==="ferie") && o.inizioAssenza}
-onChange={async e=>{
-  const val = e.target.value;
-  await cambiaStato(o.id,val);
-}}
-style={{
-  minWidth:120,
-  padding:"6px 10px",
-  borderRadius:"8px",
-  fontWeight:500,
-
-  background:
-    o.stato==="malattia" ? "#fff7ed" :
-    o.stato==="ferie" ? "#ecfeff" :
-    "#ecfdf5",
-
-  color:
-    o.stato==="malattia" ? "#ea580c" :
-    o.stato==="ferie" ? "#0891b2" :
-    "#16a34a",
-
-  border:"1px solid rgba(255,255,255,0.1)",
-
-  opacity:
-    ((o.stato==="malattia" || o.stato==="ferie") && o.inizioAssenza)
-      ? 0.5
-      : 1,
-
-  cursor:
-    ((o.stato==="malattia" || o.stato==="ferie") && o.inizioAssenza)
-      ? "not-allowed"
-      : "pointer"
-}}
->
-<option value="attivo">Attivo</option>
-<option value="malattia">Malattia</option>
-<option value="ferie">Ferie</option>
-<option value="cessato">Cessato</option>
-</select>
-</td>
-
-<td style={{whiteSpace:"nowrap", padding:"12px 6px"}}>
-  {(o.stato==="malattia" || o.stato==="ferie") ? (
-    o.inizioAssenza ? (
-      <span style={{whiteSpace:"nowrap", fontSize:15, fontWeight:600}}>
-        {o.stato==="malattia" ? "🟠 Malattia" : "🔵 Ferie"} ·
-        dal {formatDate(o.inizioAssenza)}
-        {o.fineAssenza ? ` al ${formatDate(o.fineAssenza)}` : " (in corso)"}
-      </span>
-    ) : (
-      <div style={{
-        display:"flex",
-        flexDirection:"column",
-        alignItems:"center",
-        gap:6,
-        width:"100%",
-        marginTop:6
-      }}>
-
-        <div style={{
-          display:"flex",
-          alignItems:"center",
-          gap:8
+      onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.05)"}
+      onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+      >
+        <td style={{
+          whiteSpace:"nowrap",
+          padding:"12px 6px",
         }}>
-          <input
-            type="date"
-            value={inizioAssenza}
-            onChange={e=>setInizioAssenza(e.target.value)}
-            style={{padding:"5px", borderRadius:"6px", border:"1px solid rgba(255,255,255,0.1)", background:"rgba(255,255,255,0.05)", color:"white"}}
-          />
-
-          <span style={{opacity:0.6}}>→</span>
-
-          <input
-            type="date"
-            value={fineAssenza}
-            onChange={e=>setFineAssenza(e.target.value)}
-            style={{padding:"5px", borderRadius:"6px", border:"1px solid rgba(255,255,255,0.1)", background:"rgba(255,255,255,0.05)", color:"white"}}
-          />
-        </div>
-
-        <div style={{
+          <span style={{
+            whiteSpace:"nowrap",
+            fontWeight:600,
+            fontSize:18,
+            color:"#f8fafc",
+            letterSpacing:0.3
+          }}>
+            👷 {o.nome}
+          </span>
+        </td>
+        <td style={{
+          padding:"12px 6px",
           display:"flex",
-          justifyContent:"center",
-          alignItems:"center",
-          gap:10
+          justifyContent:"flex-end"
+        }}>
+          <div style={{display:"flex", alignItems:"center", gap:6, whiteSpace:"nowrap"}}>
+            <span style={{fontWeight:500}}>€ {o.pagaGiornaliera || 0}</span>
+            <button
+              className="btn-ghost"
+              style={{padding:"4px 6px", fontSize:12}}
+              onClick={()=>{
+                const nuova = prompt("Nuova paga giornaliera:", o.pagaGiornaliera);
+                if(nuova!==null){
+                  modificaPaga(o.id, nuova);
+                }
+              }}
+            >
+              ✏️
+            </button>
+          </div>
+        </td>
+        <td style={{padding:"12px 6px"}}>
+          <select
+            value={o.stato || "attivo"}
+            disabled={(o.stato==="malattia" || o.stato==="ferie") && o.inizioAssenza}
+            onChange={async e=>{
+              const val = e.target.value;
+              await cambiaStato(o.id,val);
+            }}
+            style={{
+              minWidth:120,
+              padding:"6px 10px",
+              borderRadius:"8px",
+              fontWeight:500,
+              background:
+                o.stato==="malattia" ? "#fff7ed" :
+                o.stato==="ferie" ? "#ecfeff" :
+                "#ecfdf5",
+              color:
+                o.stato==="malattia" ? "#ea580c" :
+                o.stato==="ferie" ? "#0891b2" :
+                "#16a34a",
+              border:"1px solid rgba(255,255,255,0.1)",
+              opacity:
+                ((o.stato==="malattia" || o.stato==="ferie") && o.inizioAssenza)
+                  ? 0.5
+                  : 1,
+              cursor:
+                ((o.stato==="malattia" || o.stato==="ferie") && o.inizioAssenza)
+                  ? "not-allowed"
+                  : "pointer"
+            }}
+          >
+            <option value="attivo">Attivo</option>
+            <option value="malattia">Malattia</option>
+            <option value="ferie">Ferie</option>
+            <option value="cessato">Cessato</option>
+          </select>
+        </td>
+        <td style={{whiteSpace:"nowrap", padding:"12px 6px"}}>
+          {(o.stato==="malattia" || o.stato==="ferie") ? (
+            o.inizioAssenza ? (
+              <span style={{whiteSpace:"nowrap", fontSize:15, fontWeight:600}}>
+                {o.stato==="malattia" ? "🟠 Malattia" : "🔵 Ferie"} ·
+                dal {formatDate(o.inizioAssenza)}
+                {o.fineAssenza ? ` al ${formatDate(o.fineAssenza)}` : " (in corso)"}
+              </span>
+            ) : (
+              <div style={{
+                display:"flex",
+                flexDirection:"column",
+                alignItems:"center",
+                gap:6,
+                width:"100%",
+                marginTop:6
+              }}>
+                <div style={{
+                  display:"flex",
+                  alignItems:"center",
+                  gap:8
+                }}>
+                  <input
+                    type="date"
+                    value={inizioAssenza}
+                    onChange={e=>setInizioAssenza(e.target.value)}
+                    style={{padding:"5px", borderRadius:"6px", border:"1px solid rgba(255,255,255,0.1)", background:"rgba(255,255,255,0.05)", color:"white"}}
+                  />
+                  <span style={{opacity:0.6}}>→</span>
+                  <input
+                    type="date"
+                    value={fineAssenza}
+                    onChange={e=>setFineAssenza(e.target.value)}
+                    style={{padding:"5px", borderRadius:"6px", border:"1px solid rgba(255,255,255,0.1)", background:"rgba(255,255,255,0.05)", color:"white"}}
+                  />
+                </div>
+                <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+                  alignItems:"center",
+                  gap:10
+                }}>
+                  <button
+                    className="btn-ghost"
+                    style={{
+                      fontSize:11,
+                      padding:"4px 10px",
+                      display:"flex",
+                      alignItems:"center",
+                      gap:4,
+                      border:"1px solid rgba(34,197,94,0.4)",
+                      color:"#4ade80"
+                    }}
+                    onClick={async ()=>{
+                      if(fineAssenza && inizioAssenza && fineAssenza < inizioAssenza){
+                        alert("La data di fine non può essere precedente alla data di inizio");
+                        return;
+                      }
+                      if(!inizioAssenza){
+                        alert("Inserisci la data di inizio");
+                        return;
+                      }
+                      await updateDoc(doc(db,"operai",o.id),{
+                        stato:o.stato,
+                        inizioAssenza:inizioAssenza,
+                        fineAssenza:fineAssenza || ""
+                      });
+                      await salvaAssenza({
+                        ...o,
+                        id: o.id,
+                        inizioAssenza:inizioAssenza,
+                        fineAssenza:fineAssenza || ""
+                      });
+                      setInizioAssenza("");
+                      setFineAssenza("");
+                    }}
+                  >
+                    💾 Salva
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    style={{
+                      fontSize:11,
+                      padding:"4px 10px",
+                      display:"flex",
+                      alignItems:"center",
+                      gap:4,
+                      border:"1px solid rgba(248,113,113,0.4)",
+                      color:"#f87171"
+                    }}
+                    onClick={async ()=>{
+                      await updateDoc(doc(db,"operai",o.id),{
+                        stato:"attivo",
+                        inizioAssenza:"",
+                        fineAssenza:""
+                      });
+                      setInizioAssenza("");
+                      setFineAssenza("");
+                    }}
+                  >
+                    ✖ Annulla
+                  </button>
+                </div>
+              </div>
+            )
+          ) : (
+            <span style={{opacity:0.4}}>-</span>
+          )}
+        </td>
+        <td style={{padding:"12px 6px"}}>
+          <button
+            className="btn-ghost"
+            style={{fontSize:12}}
+            onClick={() => navigate(`/storico-operaio?nome=${o.nome}`)}
+          >
+            📄
+          </button>
+        </td>
+        <td style={{
+          padding:"12px 6px",
+          display:"flex",
+          justifyContent:"flex-end",
+          gap:"8px"
         }}>
           <button
             className="btn-ghost"
             style={{
-              fontSize:11,
-              padding:"4px 10px",
-              display:"flex",
-              alignItems:"center",
-              gap:4,
-              border:"1px solid rgba(34,197,94,0.4)",
-              color:"#4ade80"
+              fontSize:12,
+              border:"1px solid rgba(255,80,80,0.3)",
+              color:"#ff6b6b"
             }}
-            onClick={async ()=>{
-              if(fineAssenza && inizioAssenza && fineAssenza < inizioAssenza){
-                alert("La data di fine non può essere precedente alla data di inizio");
-                return;
-              }
-              if(!inizioAssenza){
-                alert("Inserisci la data di inizio");
-                return;
-              }
-
-              await updateDoc(doc(db,"operai",o.id),{
-                stato:o.stato,
-                inizioAssenza:inizioAssenza,
-                fineAssenza:fineAssenza || ""
-              });
-
-              await salvaAssenza({
-                ...o,
-                id: o.id,
-                inizioAssenza:inizioAssenza,
-                fineAssenza:fineAssenza || ""
-              });
-
-              setInizioAssenza("");
-              setFineAssenza("");
-            }}
+            onClick={()=>eliminaOperaio(o.id)}
+            title="Elimina operaio"
           >
-            💾 Salva
+            🗑️
           </button>
-
-          <button
-            className="btn-ghost"
+        </td>
+      </tr>
+      {/* MOBILE CARD ROW */}
+      <tr className="mobile-row">
+        <td colSpan="6">
+          <div
             style={{
-              fontSize:11,
-              padding:"4px 10px",
-              display:"flex",
-              alignItems:"center",
-              gap:4,
-              border:"1px solid rgba(248,113,113,0.4)",
-              color:"#f87171"
-            }}
-            onClick={async ()=>{
-              await updateDoc(doc(db,"operai",o.id),{
-                stato:"attivo",
-                inizioAssenza:"",
-                fineAssenza:""
-              });
-
-              setInizioAssenza("");
-              setFineAssenza("");
+              border:"1px solid rgba(255,255,255,0.08)",
+              borderRadius:"16px",
+              padding:"16px",
+              background:"rgba(255,255,255,0.04)",
+              width:"100%",
+              boxSizing:"border-box"
             }}
           >
-            ✖ Annulla
-          </button>
-        </div>
+            <div style={{
+              fontWeight:700,
+              fontSize:18,
+              marginBottom:10
+            }}>
+              👷 {o.nome}
+            </div>
+            <div style={{
+              height:"1px",
+              background:"rgba(255,255,255,0.08)",
+              marginBottom:"12px"
+            }} />
+            <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8}}>
+              <span style={{opacity:0.6}}>Paga</span>
 
-      </div>
-    )
-  ) : (
-    <span style={{opacity:0.4}}>-</span>
-  )}
-</td>
+              <div style={{display:"flex", alignItems:"center", gap:8}}>
+                <span style={{fontWeight:600}}>€ {o.pagaGiornaliera || 0}</span>
 
-<td style={{padding:"12px 6px"}}>
-  <button
-    className="btn-ghost"
-    style={{fontSize:12}}
-    onClick={() => navigate(`/storico-operaio?nome=${o.nome}`)}
-  >
-    📄
-  </button>
-</td>
-<td style={{textAlign:"center", padding:"12px 6px"}}>
-  <button
-    className="btn-ghost"
-    style={{
-      fontSize:12,
-      border:"1px solid rgba(255,80,80,0.3)",
-      color:"#ff6b6b"
-    }}
-    onClick={()=>eliminaOperaio(o.id)}
-    title="Elimina operaio"
-  >
-    🗑️
-  </button>
-</td>
-
-</tr>
-
-);
+                <button
+                  className="btn-ghost"
+                  style={{
+                    padding:"6px 10px",
+                    borderRadius:"10px",
+                    border:"1px solid rgba(255,255,255,0.1)"
+                  }}
+                  onClick={()=>{
+                    const nuova = prompt("Nuova paga giornaliera:", o.pagaGiornaliera);
+                    if(nuova!==null){
+                      modificaPaga(o.id, nuova);
+                    }
+                  }}
+                >
+                  ✏️
+                </button>
+              </div>
+            </div>
+            <div style={{display:"flex", justifyContent:"space-between", marginBottom:8}}>
+              <span style={{opacity:0.6}}>Stato</span>
+              <select
+                value={o.stato || "attivo"}
+                onChange={async e=>{
+                  const val = e.target.value;
+                  await cambiaStato(o.id,val);
+                }}
+                style={{
+                  padding:"8px 12px",
+                  borderRadius:"10px",
+                  fontWeight:600,
+                  background:
+                    o.stato==="malattia" ? "#fff7ed" :
+                    o.stato==="ferie" ? "#ecfeff" :
+                    o.stato==="cessato" ? "rgba(255,0,0,0.15)" :
+                    "rgba(34,197,94,0.15)",
+                  color:
+                    o.stato==="malattia" ? "#ea580c" :
+                    o.stato==="ferie" ? "#0891b2" :
+                    o.stato==="cessato" ? "#ef4444" :
+                    "#22c55e",
+                  border:"1px solid rgba(255,255,255,0.1)",
+                  minWidth:"120px",
+                  textAlign:"center"
+                }}
+              >
+                <option value="attivo">Attivo</option>
+                <option value="malattia">Malattia</option>
+                <option value="ferie">Ferie</option>
+                <option value="cessato">Cessato</option>
+              </select>
+            </div>
+            <div style={{display:"flex", justifyContent:"space-between", marginBottom:8}}>
+              <span style={{opacity:0.6}}>Storico</span>
+              <button className="btn-ghost" onClick={() => navigate(`/storico-operaio?nome=${o.nome}`)}>📄</button>
+            </div>
+            <div style={{display:"flex", justifyContent:"space-between"}}>
+              <span style={{opacity:0.6}}>Elimina</span>
+              <button className="btn-ghost" onClick={()=>eliminaOperaio(o.id)}>🗑️</button>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </>
+  );
 })}
 
 </tbody>
@@ -799,6 +881,81 @@ style={{
   </div>
 )}
 </div>
+<style>{`
+.mobile-row {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-row {
+    display: table-row;
+  }
+
+  .operai-table {
+    min-width: 100% !important;
+  }
+
+  .mobile-row td {
+    display: block;
+    width: 100%;
+    padding: 10px 0;
+    border: none !important;
+  }
+
+  .mobile-row > td {
+    width: 100%;
+  }
+
+  .mobile-row > td > div {
+    width: 100%;
+  }
+
+  /* NOME */
+  .mobile-row td:nth-child(1) {
+    font-weight: 700;
+    font-size: 18px;
+    justify-content: flex-start;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 8px;
+  }
+
+  /* LABELS */
+  .mobile-row td:nth-child(2)::before { content: "Paga"; }
+  .mobile-row td:nth-child(3)::before { content: "Stato"; }
+  .mobile-row td:nth-child(4)::before { content: "Periodo"; }
+  .mobile-row td:nth-child(5)::before { content: "Storico"; }
+  .mobile-row td:nth-child(6)::before { content: "Elimina"; }
+
+  .mobile-row td::before {
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  /* BOTTONI DESTRA */
+  .mobile-row td:nth-child(5),
+  .mobile-row td:nth-child(6) {
+    justify-content: flex-end;
+  }
+
+  select {
+    width: 55% !important;
+    min-width: unset !important;
+  }
+
+  button {
+    padding: 6px 10px !important;
+  }
+
+}
+`}</style>
 
 </div>
 

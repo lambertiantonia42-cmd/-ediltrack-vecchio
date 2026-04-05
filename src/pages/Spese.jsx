@@ -262,7 +262,14 @@ export default function Spese() {
   }, [rows]);
 
   return (
-    <div className="spese-wrap">
+    <div
+      className="spese-wrap"
+      style={{
+        width: "100%",
+        maxWidth: "100vw",
+        overflowX: "hidden"
+      }}
+    >
       <div className="panel">
 
         <h2>💸 Spese giornaliere</h2>
@@ -273,7 +280,15 @@ export default function Spese() {
 
         <form onSubmit={onSubmit}>
 
-          <div className="form-grid">
+          <div
+            className="form-grid"
+            style={{
+              gridTemplateColumns:
+                window.innerWidth < 768
+                  ? "1fr"
+                  : "repeat(auto-fit, minmax(200px, 1fr))"
+            }}
+          >
 
             <div className="field">
               <label>Data</label>
@@ -349,115 +364,117 @@ export default function Spese() {
 
         </form>
 
-        <table className="table" style={{ marginTop: 14 }}>
+        <div style={{ width: "100%", overflowX: "auto" }}>
+          <table className="table" style={{ marginTop: 14, minWidth: "700px" }}>
 
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Cantiere</th>
-              <th>Fornitore</th>
-              <th>Descrizione</th>
-              <th>Pagamento</th>
-              <th>Importo</th>
-              <th></th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            {rowsDelGiorno.map((r) => (
-
-              <tr key={r.id}>
-
-                <td>
-                  {editingId === r.id ? (
-                    <input type="date"
-                      style={{width:"100%", maxWidth:"140px"}}
-                      value={editForm.data}
-                      onChange={(e)=>setEditForm({...editForm,data:e.target.value})}
-                    />
-                  ) : r.data}
-                </td>
-
-                <td>
-                  {editingId === r.id ? (
-                    <input
-                      style={{width:"100%", maxWidth:"140px"}}
-                      value={editForm.cantiere}
-                      onChange={(e)=>setEditForm({...editForm,cantiere:e.target.value})}
-                    />
-                  ) : r.cantiere}
-                </td>
-
-                <td>
-                  {editingId === r.id ? (
-                    <input
-                      style={{width:"100%", maxWidth:"140px"}}
-                      value={editForm.fornitore}
-                      onChange={(e)=>setEditForm({...editForm,fornitore:e.target.value})}
-                    />
-                  ) : r.fornitore}
-                </td>
-
-                <td>
-                  {editingId === r.id ? (
-                    <input
-                      style={{width:"100%", maxWidth:"140px"}}
-                      value={editForm.descrizione}
-                      onChange={(e)=>setEditForm({...editForm,descrizione:e.target.value})}
-                    />
-                  ) : r.descrizione}
-                </td>
-
-                <td>
-                  {editingId === r.id ? (
-                    <select
-                      style={{width:"100%", maxWidth:"140px"}}
-                      value={editForm.pagamento}
-                      onChange={(e)=>setEditForm({...editForm,pagamento:e.target.value})}
-                    >
-                      <option>Contanti</option>
-                      <option>Carta</option>
-                      <option>Bonifico</option>
-                    </select>
-                  ) : r.pagamento}
-                </td>
-
-                <td>
-                  {editingId === r.id ? (
-                    <input
-                      type="number"
-                      style={{width:"100%", maxWidth:"140px"}}
-                      value={editForm.importo}
-                      onChange={(e)=>setEditForm({...editForm,importo:e.target.value})}
-                    />
-                  ) : `€ ${Number(r.importo).toFixed(2)}`}
-                </td>
-
-                <td>
-                  <div style={{display:"flex",gap:8, justifyContent:"flex-end"}}>
-
-                  {editingId === r.id ? (
-                    <>
-                      <button className="btn-primary" onClick={()=>saveEdit(r.id)}>Salva</button>
-                      <button className="btn-ghost" onClick={cancelEdit}>Annulla</button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="btn-ghost" onClick={()=>startEdit(r)}>Modifica</button>
-                      <button className="btn-ghost" onClick={()=>onDelete(r.id)}>Elimina</button>
-                    </>
-                  )}
-                  </div>
-                </td>
-
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Cantiere</th>
+                <th>Fornitore</th>
+                <th>Descrizione</th>
+                <th>Pagamento</th>
+                <th>Importo</th>
+                <th></th>
               </tr>
+            </thead>
 
-            ))}
+            <tbody>
 
-          </tbody>
+              {rowsDelGiorno.map((r) => (
 
-        </table>
+                <tr key={r.id}>
+
+                  <td>
+                    {editingId === r.id ? (
+                      <input type="date"
+                        style={{width:"100%", maxWidth:"140px"}}
+                        value={editForm.data}
+                        onChange={(e)=>setEditForm({...editForm,data:e.target.value})}
+                      />
+                    ) : r.data}
+                  </td>
+
+                  <td>
+                    {editingId === r.id ? (
+                      <input
+                        style={{width:"100%", maxWidth:"140px"}}
+                        value={editForm.cantiere}
+                        onChange={(e)=>setEditForm({...editForm,cantiere:e.target.value})}
+                      />
+                    ) : r.cantiere}
+                  </td>
+
+                  <td>
+                    {editingId === r.id ? (
+                      <input
+                        style={{width:"100%", maxWidth:"140px"}}
+                        value={editForm.fornitore}
+                        onChange={(e)=>setEditForm({...editForm,fornitore:e.target.value})}
+                      />
+                    ) : r.fornitore}
+                  </td>
+
+                  <td>
+                    {editingId === r.id ? (
+                      <input
+                        style={{width:"100%", maxWidth:"140px"}}
+                        value={editForm.descrizione}
+                        onChange={(e)=>setEditForm({...editForm,descrizione:e.target.value})}
+                      />
+                    ) : r.descrizione}
+                  </td>
+
+                  <td>
+                    {editingId === r.id ? (
+                      <select
+                        style={{width:"100%", maxWidth:"140px"}}
+                        value={editForm.pagamento}
+                        onChange={(e)=>setEditForm({...editForm,pagamento:e.target.value})}
+                      >
+                        <option>Contanti</option>
+                        <option>Carta</option>
+                        <option>Bonifico</option>
+                      </select>
+                    ) : r.pagamento}
+                  </td>
+
+                  <td>
+                    {editingId === r.id ? (
+                      <input
+                        type="number"
+                        style={{width:"100%", maxWidth:"140px"}}
+                        value={editForm.importo}
+                        onChange={(e)=>setEditForm({...editForm,importo:e.target.value})}
+                      />
+                    ) : `€ ${Number(r.importo).toFixed(2)}`}
+                  </td>
+
+                  <td>
+                    <div style={{display:"flex",gap:8, justifyContent:"flex-end"}}>
+
+                    {editingId === r.id ? (
+                      <>
+                        <button className="btn-primary" onClick={()=>saveEdit(r.id)}>Salva</button>
+                        <button className="btn-ghost" onClick={cancelEdit}>Annulla</button>
+                      </>
+                    ) : (
+                      <>
+                        <button className="btn-ghost" onClick={()=>startEdit(r)}>Modifica</button>
+                        <button className="btn-ghost" onClick={()=>onDelete(r.id)}>Elimina</button>
+                      </>
+                    )}
+                    </div>
+                  </td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+        </div>
 
       </div>
     </div>

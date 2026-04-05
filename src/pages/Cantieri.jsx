@@ -79,6 +79,7 @@ export default function Cantieri() {
 
   const [nomeNew, setNomeNew] = useState("");
   const [statoNew, setStatoNew] = useState("Attivo");
+  const [dataInizioNew, setDataInizioNew] = useState("");
   const [indirizzoNew, setIndirizzoNew] = useState("");
   const [loadingNew, setLoadingNew] = useState(false);
 
@@ -96,13 +97,35 @@ export default function Cantieri() {
   const [filtroData, setFiltroData] = useState("");
   const [meseAperto, setMeseAperto] = useState(null);
 
-  const modalRef = useRef(null);
+const modalRef = useRef(null);
+const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
 useEffect(() => {
   if (meseAperto && modalRef.current) {
+    // porta SEMPRE la modale davanti agli occhi
+    modalRef.current.scrollIntoView({
+      behavior: "instant",
+      block: "start"
+    });
+
+    // reset scroll interno
     modalRef.current.scrollTop = 0;
+
+    // blocca scroll pagina sotto
+    document.body.style.overflow = "hidden";
   }
+
+  return () => {
+    document.body.style.overflow = "auto";
+  };
 }, [meseAperto]);
+
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
 
@@ -294,6 +317,7 @@ useEffect(() => {
         nome: nomeNew.trim(),
         stato: statoNew,
         indirizzo: indirizzoNew.trim(),
+        dataInizio: dataInizioNew || null,
         lat: coords.lat,
         lng: coords.lng,
         createdAt: serverTimestamp(),
@@ -314,7 +338,8 @@ useEffect(() => {
       setNomeNew("");
       setStatoNew("Attivo");
       setIndirizzoNew("");
-
+      setDataInizioNew("");
+   
     } catch (e) {
 
       console.log(e);
@@ -395,6 +420,57 @@ useEffect(() => {
 
   }
 
+  const infoBlock = (
+    <>
+      <div style={{
+        marginTop: "12px",
+        marginBottom: "4px",
+        fontSize: "12px",
+        opacity: 0.6,
+        letterSpacing: "0.5px"
+      }}>
+        INFORMAZIONI CANTIERE
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+          gap: "12px",
+          marginTop: "16px",
+          alignItems: "stretch"
+        }}
+      >
+        <div className="mini-card" style={{ boxShadow:"0 4px 12px rgba(0,0,0,0.08)", transition:"all .2s ease", padding:"10px", minHeight:"70px", maxWidth:"100%" }}>
+          <div className="mini-label">Data creazione</div>
+          <div className="mini-sub" style={{ fontWeight: 600 }}>
+            {selected?.dataInizio
+              ? new Date(selected.dataInizio).toLocaleDateString("it-IT")
+              : selected?.createdAt?.toDate
+              ? selected.createdAt.toDate().toLocaleDateString("it-IT")
+              : "-"}
+          </div>
+        </div>
+
+        <div className="mini-card" style={{ boxShadow:"0 4px 12px rgba(0,0,0,0.08)", transition:"all .2s ease", padding:"10px", minHeight:"70px", maxWidth:"100%" }}>
+          <div className="mini-label">Ultimo aggiornamento</div>
+          <div className="mini-sub" style={{ fontWeight: 600 }}>
+            {selected?.updatedAt?.toDate
+              ? selected.updatedAt.toDate().toLocaleDateString("it-IT")
+              : "-"}
+          </div>
+        </div>
+
+        <div className="mini-card" style={{ boxShadow:"0 4px 12px rgba(0,0,0,0.08)", transition:"all .2s ease", padding:"10px", minHeight:"70px", maxWidth:"100%" }}>
+          <div className="mini-label">Ultima modifica</div>
+          <div className="mini-sub" style={{ fontWeight: 600, textTransform: "capitalize" }}>
+            {(selected?.updatedByEmail || selected?.createdByEmail || "").split("@")[0] || "-"}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div
       className="cantieri-wrap"
@@ -402,24 +478,42 @@ useEffect(() => {
         background: "var(--bg-main)",
         color: "var(--text-main)",
         minHeight: "100vh",
-        padding: "20px"
+        padding: isMobile ? "6px" : "20px",
+        width: "100%",
+        maxWidth: "1400px",
+        margin: "0 auto",
+        overflowX: "hidden"
       }}
     >
-      <div className="panel" style={{ background: "transparent" }}>
+      <div className="panel" style={{ background: "transparent", width: "100%", maxWidth: "100%" }}>
 
         {/* HEADER PAGINA */}
-        <div style={{ marginBottom: "16px" }}>
+        <div style={{ 
+          marginBottom: "16px",
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          background: "var(--bg-main)",
+          paddingTop: "10px",
+          paddingBottom: "10px",
+          backdropFilter: "blur(6px)"
+        }}>
           <h1 style={{ fontSize: "22px", fontWeight: 700, color: "var(--text-main)" }}>🏗 Gestione cantieri</h1>
         </div>
 
         {/* CARD 1 - CREAZIONE */}
         <div className="detail-box" style={{
           marginBottom:"16px",
-          background:"var(--bg-card)",
+          background:"linear-gradient(135deg, rgba(34,197,94,0.15), rgba(0,0,0,0.4))",
+          border:"1px solid rgba(34,197,94,0.25)",
           boxShadow:"0 10px 30px rgba(0,0,0,0.12)",
-          border:"1px solid rgba(255,255,255,0.08)",
           borderRadius:"18px",
-          transition:"all .2s ease"
+          transition:"all .2s ease",
+          padding: isMobile ? "16px" : undefined,
+          width: "100%",
+          marginLeft: undefined,
+          marginRight: undefined,
+          borderRadius: isMobile ? "14px" : undefined,
         }}>
 
           <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
@@ -432,29 +526,27 @@ useEffect(() => {
           <div className="cantieri-create" style={{marginTop:"12px"}}>
 
             <input
-              className="input"
-              placeholder="Nuovo cantiere…"
-              value={nomeNew}
-              onChange={(e) => setNomeNew(e.target.value)}
-            />
+  className="input"
+  placeholder="Nuovo cantiere…"
+  value={nomeNew}
+  onChange={(e) => setNomeNew(e.target.value)}
+/>
 
-            <input
-              className="input"
-              placeholder="Indirizzo completo (via + città)"
-              value={indirizzoNew}
-              onChange={(e) => setIndirizzoNew(e.target.value)}
-            />
+<input
+  className="input"
+  placeholder="Indirizzo completo (via + città)"
+  value={indirizzoNew}
+  onChange={(e) => setIndirizzoNew(e.target.value)}
+/>
 
-            <select
-              className="select small"
-              value={statoNew}
-              onChange={(e) => setStatoNew(e.target.value)}
-            >
-              <option>Attivo</option>
-              <option>Completato</option>
-              <option>In pausa</option>
-            </select>
+<input
+  type="date"
+  className="input"
+  value={dataInizioNew}
+  onChange={(e) => setDataInizioNew(e.target.value)}
+/>
 
+           
             <button
               className="btn-primary"
               onClick={creaCantiere}
@@ -467,19 +559,44 @@ useEffect(() => {
 
         </div>
 
-        <div className="cantieri-layout">
+        <div
+          className="cantieri-layout"
+          style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? "10px" : "12px",
+            width: "100%",
+            maxWidth: "100%",
+            alignItems: "flex-start"
+          }}
+        >
 
-          <aside className="cantieri-left">
+          <aside
+            className="cantieri-left"
+            style={{
+              width: isMobile ? "100%" : "320px",
+              flexShrink: 0
+            }}
+          >
             <div className="detail-box" style={{
               padding: "16px",
               marginTop: "-8px",
-              background:"var(--bg-card)",
+              background:"linear-gradient(135deg, rgba(59,130,246,0.12), rgba(0,0,0,0.4))",
               boxShadow:"0 4px 20px rgba(0,0,0,0.06)",
               border:"1px solid rgba(255,255,255,0.08)",
-              backdropFilter:"blur(6px)"
+              backdropFilter:"blur(6px)",
+              padding: isMobile ? "16px" : undefined,
+              width: "100%",
+              marginLeft: undefined,
+              marginRight: undefined,
+              borderRadius: isMobile ? "14px" : undefined,
+              overflow: "hidden",
+              borderLeft: "none",
+              borderRight: "none",
+              backgroundClip: "padding-box",
             }}>
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"}}>
-                <span style={{fontWeight:600}}>📂 Cantieri</span>
+                <span style={{fontWeight:600}}>📂 Lista cantieri</span>
                 <span style={{fontSize:"12px", opacity:0.6}}>{listaFiltrata.length} totali</span>
               </div>
 
@@ -505,7 +622,7 @@ useEffect(() => {
 
             </div>
 
-            <div className="cantieri-list">
+            <div className="cantieri-list" style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
 
               {listaFiltrata.map((c) => (
 
@@ -520,10 +637,15 @@ useEffect(() => {
                     border:"1px solid rgba(255,255,255,0.06)",
                     transition:"all .2s ease",
                     cursor:"pointer",
+                    touchAction: "manipulation",
+                    width:"100%",
+                    border:"none",
+                    outline:"none",
                   }}
                   onClick={() => setSelectedId(c.id)}
-                  onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"}
-                  onMouseLeave={e => e.currentTarget.style.transform = "translateY(0px)"}
+                  onTouchStart={() => setSelectedId(c.id)}
+                  onMouseEnter={!isMobile ? (e => e.currentTarget.style.transform = "translateY(-4px)") : undefined}
+                  onMouseLeave={!isMobile ? (e => e.currentTarget.style.transform = "translateY(0px)") : undefined}
                 >
 
                   <div className="row-left">
@@ -544,6 +666,7 @@ useEffect(() => {
                   <div style={{ display: "flex", gap: "6px", marginLeft: "auto" }}>
                     <button
                       className="row-trash"
+                      onTouchStart={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingCantiere(c);
@@ -556,6 +679,7 @@ useEffect(() => {
 
                     <button
                       className="row-trash"
+                      onTouchStart={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteCantiere(c);
@@ -574,7 +698,16 @@ useEffect(() => {
             </div>
           </aside>
 
-          <section className="cantieri-right" style={{display:"flex", flexDirection:"column", gap:"12px"}}>
+          <section
+            className="cantieri-right"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+              width: "100%",
+              minWidth: 0
+            }}
+          >
             <div style={{
               background:"transparent",
               padding:"12px",
@@ -583,7 +716,14 @@ useEffect(() => {
             }}>
 
             {editingCantiere && (
-              <div className="detail-box" style={{ marginBottom: "16px" }}>
+              <div className="detail-box" style={{
+                marginBottom: "16px",
+                padding: isMobile ? "16px" : undefined,
+                width:"100%",
+                marginLeft: undefined,
+                marginRight: undefined,
+                borderRadius: isMobile ? "14px" : undefined,
+              }}>
 
                 <div className="detail-box-title">✏️ Modifica cantiere</div>
 
@@ -627,12 +767,12 @@ useEffect(() => {
               <>
                 {/* HEADER PRO */}
                 <div className="detail-top" style={{
-                  background:"linear-gradient(135deg, var(--bg-card), rgba(0,0,0,0.2))",
-                  boxShadow:"0 10px 30px rgba(0,0,0,0.15)",
-                  padding:"18px",
-                  borderRadius:"18px",
-                  border:"1px solid rgba(255,255,255,0.08)",
-                  transition:"all .2s ease"
+                  padding: "8px 2px",
+                  background: "none",
+                  boxShadow: "none",
+                  border: "none",
+                  backdropFilter: "none",
+                  borderRadius: "0"
                 }}>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -701,95 +841,37 @@ useEffect(() => {
 
                 </div>
 
-                {/* Section header separator */}
-                <div style={{
-                  marginTop: "12px",
-                  marginBottom: "4px",
-                  fontSize: "12px",
-                  opacity: 0.6,
-                  letterSpacing: "0.5px"
-                }}>
-                  INFORMAZIONI CANTIERE
-                </div>
-                {/* INFO EXTRA BOX */}
+                {/* Desktop: info block */}
+                {!isMobile && infoBlock}
+
+                {/* KPI */}
                 <div
+                  className="detail-cards"
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                    gap: "12px",
-                    marginTop: "16px"
+                    display: "flex",
+                    flexDirection: isMobile ? "row" : "row",
+                    gap: isMobile ? "10px" : "12px",
+                    flexWrap: isMobile ? "nowrap" : "wrap",
+                    marginTop: "12px",
+                    justifyContent: isMobile ? "space-between" : undefined,
                   }}
                 >
                   <div
                     className="mini-card"
                     style={{
-                      boxShadow:"0 4px 12px rgba(0,0,0,0.08)",
-                      transition:"all .2s ease",
-                      padding:"10px",
-                      minHeight:"70px",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
-                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(0px)"}
-                  >
-                    <div className="mini-label">Data creazione</div>
-                    <div className="mini-sub" style={{ fontWeight: 600 }}>
-                      {selected.createdAt?.toDate
-                        ? selected.createdAt.toDate().toLocaleDateString("it-IT")
-                        : "-"}
-                    </div>
-                  </div>
-                  <div
-                    className="mini-card"
-                    style={{
-                      boxShadow:"0 4px 12px rgba(0,0,0,0.08)",
-                      transition:"all .2s ease",
-                      padding:"10px",
-                      minHeight:"70px",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
-                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(0px)"}
-                  >
-                    <div className="mini-label">Ultimo aggiornamento</div>
-                    <div className="mini-sub" style={{ fontWeight: 600 }}>
-                      {selected.updatedAt?.toDate
-                        ? selected.updatedAt.toDate().toLocaleDateString("it-IT")
-                        : "-"}
-                    </div>
-                  </div>
-                  <div
-                    className="mini-card"
-                    style={{
-                      boxShadow:"0 4px 12px rgba(0,0,0,0.08)",
-                      transition:"all .2s ease",
-                      padding:"10px",
-                      minHeight:"70px",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
-                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(0px)"}
-                  >
-                    <div className="mini-label">Ultima modifica</div>
-                    <div className="mini-sub" style={{ fontWeight: 600, textTransform: "capitalize" }}>
-                      {(selected.updatedByEmail || selected.createdByEmail || "")
-                        .split("@")[0] || "-"}
-                    </div>
-                  </div>
-                </div>
-
-                {/* KPI */}
-                <div className="detail-cards">
-                  <div
-                    className="mini-card"
-                    style={{
-                      boxShadow:"0 4px 12px rgba(0,0,0,0.08)",
-                      transition:"all .2s ease",
-                      padding:"10px",
-                      minHeight:"70px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      transition: "all .2s ease",
+                      padding: "10px",
+                      minHeight: "70px",
+                      width: isMobile ? "48%" : undefined,
+                      flex: isMobile ? undefined : "1 1 calc(33.33% - 10px)",
+                      maxWidth: isMobile ? undefined : "calc(33.33% - 10px)",
                     }}
                     onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
                     onMouseLeave={e => e.currentTarget.style.transform = "translateY(0px)"}
                   >
                     <div className="mini-label">Totale spese</div>
-                    <div className="mini-value">
+                    <div className="mini-value" style={{ fontSize: isMobile ? "20px" : undefined }}>
                       € {Number(totSpese).toFixed(2)}
                     </div>
                   </div>
@@ -797,38 +879,53 @@ useEffect(() => {
                   <div
                     className="mini-card"
                     style={{
-                      boxShadow:"0 4px 12px rgba(0,0,0,0.08)",
-                      transition:"all .2s ease",
-                      padding:"10px",
-                      minHeight:"70px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      transition: "all .2s ease",
+                      padding: "10px",
+                      minHeight: "70px",
+                      width: isMobile ? "48%" : undefined,
+                      flex: isMobile ? undefined : "1 1 calc(33.33% - 10px)",
+                      maxWidth: isMobile ? undefined : "calc(33.33% - 10px)",
                     }}
                     onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
                     onMouseLeave={e => e.currentTarget.style.transform = "translateY(0px)"}
                   >
                     <div className="mini-label">Presenze</div>
-                    <div className="mini-value">{countPresenze}</div>
+                    <div className="mini-value" style={{ fontSize: isMobile ? "20px" : undefined }}>{countPresenze}</div>
                   </div>
 
                   <div
                     className="mini-card"
                     style={{
-                      boxShadow:"0 4px 12px rgba(0,0,0,0.08)",
-                      transition:"all .2s ease",
-                      padding:"10px",
-                      minHeight:"70px",
+                      display: isMobile ? "none" : undefined,
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      transition: "all .2s ease",
+                      padding: "10px",
+                      minHeight: "70px",
+                      width: isMobile ? "48%" : undefined,
+                      flex: isMobile ? undefined : "1 1 calc(33.33% - 10px)",
+                      maxWidth: isMobile ? undefined : "calc(33.33% - 10px)",
                     }}
                     onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
                     onMouseLeave={e => e.currentTarget.style.transform = "translateY(0px)"}
                   >
                     <div className="mini-label">Operai</div>
-                    <div className="mini-sub">
-                      {operaiPreview.join(", ")}
+                    <div className="mini-value" style={{ fontSize: isMobile ? "20px" : undefined }}>
+                      <span className="mini-sub">{operaiPreview.join(", ")}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* 🔥 TABELLA COMPLETA PRESENZE */}
-                <div className="detail-box" style={{ marginTop: "16px" }}>
+                <div className="detail-box" style={{
+                  marginTop: "16px",
+                  background:"linear-gradient(135deg, rgba(251,146,60,0.12), rgba(0,0,0,0.3))",
+                  padding: isMobile ? "16px" : undefined,
+                  width:"100%",
+                  marginLeft: undefined,
+                  marginRight: undefined,
+                  borderRadius: isMobile ? "14px" : undefined,
+                }}>
 
                   <div className="detail-box-title">
                     📋 Tutte le presenze cantiere
@@ -916,6 +1013,7 @@ useEffect(() => {
                   }} onClick={()=>setMeseAperto(null)}>
 
                     <div
+                      key={meseAperto}
                       ref={modalRef}
                       onClick={e=>e.stopPropagation()}
                       style={{
@@ -926,7 +1024,8 @@ useEffect(() => {
                         background:"#1e293b",
                         borderRadius:"18px",
                         padding:"20px",
-                        boxShadow:"0 20px 60px rgba(0,0,0,0.6)"
+                        boxShadow:"0 20px 60px rgba(0,0,0,0.6)",
+                        marginTop:"0"
                       }}
                     >
 
@@ -944,7 +1043,7 @@ useEffect(() => {
                           return acc;
                         }, {})
                       )
-                      .sort((a,b)=> b[0].localeCompare(a[0]))
+                      .sort((a,b)=> a[0].localeCompare(b[0]))
                       .map(([giorno, presenze]) => (
 
                         <div key={giorno} style={{ marginTop:"12px" }}>
@@ -992,7 +1091,15 @@ useEffect(() => {
                 )}
 
                 {/* SPESE */}
-                <div className="detail-box" style={{ marginTop: "16px" }}>
+                <div className="detail-box" style={{
+                  marginTop: "16px",
+                  background:"linear-gradient(135deg, rgba(239,68,68,0.12), rgba(0,0,0,0.3))",
+                  padding: isMobile ? "16px" : undefined,
+                  width:"100%",
+                  marginLeft: undefined,
+                  marginRight: undefined,
+                  borderRadius: isMobile ? "14px" : undefined,
+                }}>
 
                   <div className="detail-box-title">
                     💸 Spese cantiere
@@ -1000,6 +1107,49 @@ useEffect(() => {
 
                   {speseSelected.length === 0 ? (
                     <p className="dim">Nessuna spesa</p>
+                  ) : isMobile ? (
+                    <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {speseSelected.map((s) => (
+                        <div key={s.id} style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "8px",
+                          padding: "14px",
+                          borderRadius: "14px",
+                          background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(30,41,59,0.9))",
+                          border: "1px solid rgba(239,68,68,0.25)",
+                          boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                          position: "relative"
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "6px" }}>
+                            <span style={{ fontWeight: 600, fontSize: "14px" }}>
+                              {(() => {
+                                if (!s.data) return "-";
+                                const [y,m,d] = s.data.split("-");
+                                return `${d}/${m}/${y}`;
+                              })()}
+                            </span>
+                            <span style={{
+                              color: "#ef4444",
+                              fontWeight: 700,
+                              fontSize: isMobile ? "16px" : "15px"
+                            }}>
+                              € {Number(s.importo || 0).toFixed(2)}
+                            </span>
+                          </div>
+                          {s.fornitore && (
+                            <div style={{ fontSize: "13px", opacity: 0.8 }}>
+                              🏢 {s.fornitore}
+                            </div>
+                          )}
+                          {s.descrizione && (
+                            <div style={{ fontSize: "13px", opacity: 0.85, lineHeight: "1.4" }}>
+                              {s.descrizione}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <table className="table" style={{ marginTop: "10px" }}>
                       <thead>
@@ -1010,11 +1160,14 @@ useEffect(() => {
                           <th>Descrizione</th>
                         </tr>
                       </thead>
-
                       <tbody>
                         {speseSelected.map((s) => (
                           <tr key={s.id}>
-                            <td>{s.data}</td>
+                            <td>{(() => {
+                              if (!s.data) return "-";
+                              const [y,m,d] = s.data.split("-");
+                              return `${d}/${m}/${y}`;
+                            })()}</td>
                             <td>€ {Number(s.importo || 0).toFixed(2)}</td>
                             <td>{s.fornitore || "-"}</td>
                             <td>{s.descrizione || "-"}</td>
@@ -1025,6 +1178,8 @@ useEffect(() => {
                   )}
 
                 </div>
+                {/* Mobile: info block */}
+                {isMobile && infoBlock}
               </>
             )}
             </div>

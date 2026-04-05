@@ -56,6 +56,11 @@ export default function Presenze(){
   const [orario,setOrario]=useState("06:00-15:00");
   const [attivita,setAttivita]=useState("");
 
+  // Stato per più attività/cantieri/orari
+  const [attivitaList, setAttivitaList] = useState([
+    { cantiereId:"", cantiereNome:"", orario:"06:00-15:00", attivita:"" }
+  ]);
+
   const [rows,setRows]=useState([]);
   const [cantieriAttivi,setCantieriAttivi]=useState([]);
   const [operai,setOperai]=useState([]);
@@ -231,73 +236,76 @@ export default function Presenze(){
     if(!u) return;
 
     // 🚫 BLOCCO DUPLICATI (stesso giorno, stesso operaio, stesso cantiere, stesso orario)
-    const duplicato = rows.find(r =>
-      r.id !== editingId &&
-      r.data === data &&
-      r.dipendente === dipendente &&
-      r.cantiereId === cantiereId &&
-      r.orario === orario
-    );
+    // (non implementato qui per multi-attività, aggiungere se necessario)
 
-    if(duplicato){
-      setErr("Presenza già inserita per questo operaio/cantiere/orario.");
-      return;
-    }
+    // ⚖️ BLOCCO SOLO PER MEZZA GIORNATA
+    // Se inserisco MEZZA, controllo che non esista già una INTERA per quel giorno/operaio
+    if(Number(giornata) === 0.5){
+      const esisteIntera = rows.some(r =>
+        r.data === data &&
+        r.dipendente === dipendente &&
+        Number(r.giornata) === 1 &&
+        r.id !== editingId
+      );
 
-    // ⚖️ BLOCCO GIORNATA > 1 (es: 1 + 0.5 non consentito)
-    const sommaGiornate = rows
-      .filter(r => r.id !== editingId && r.data === data && r.dipendente === dipendente)
-      .reduce((acc, r) => acc + Number(r.giornata || 0), 0);
-
-    if(sommaGiornate + Number(giornata) > 1){
-      setErr("Totale giornata supera 1 (Intera). Controlla le presenze.");
-      return;
+      if(esisteIntera){
+        setErr("Esiste già una giornata INTERA per questo operaio.");
+        return;
+      }
     }
 
     // 🔥 ATTIVITA NON PIÙ OBBLIGATORIA
-    if(!dipendente || !cantiereId){
+    if(!dipendente){
       setErr("Compila i campi obbligatori.");
       return;
     }
 
     try{
-
       setLoading(true);
 
-      const payload={
-        aziendaId:AZIENDA_ID,
-        data,
-        dipendente,
-        cantiereId,
-        cantiereNome,
-        cantiere:cantiereNome,
-        giornata:Number(giornata),
-        orario,
-        attivita:attivita || "",
-        createdAt:serverTimestamp(),
-        createdBy:u.uid
-      };
-
-      let targetId;
-
+      // 🔧 FIX DUPLICATI IN MODIFICA
+      // Se sto modificando, cancello tutte le righe del gruppo (stessa data + dipendente)
       if(editingId){
-        await updateDoc(doc(db,"presenze",editingId),payload);
-        targetId = editingId;
-      } else {
+        const gruppo = rows.filter(r => r.data === data && r.dipendente === dipendente);
+        for(const g of gruppo){
+          await deleteDoc(doc(db, "presenze", g.id));
+        }
+      }
+
+      for(let i = 0; i < attivitaList.length; i++){
+        const att = attivitaList[i];
+
+        if(!att.cantiereId) continue;
+
+        const payload={
+          aziendaId:AZIENDA_ID,
+          data,
+          dipendente,
+          cantiereId:att.cantiereId,
+          cantiereNome:att.cantiereNome,
+          cantiere:att.cantiereNome,
+          giornata: i === 0 ? Number(giornata) : 0,
+          orario:att.orario,
+          attivita:att.attivita || "",
+          createdAt:serverTimestamp(),
+          createdBy:u.uid
+        };
+
         const ref=await addDoc(collection(db,"presenze"),payload);
-        targetId = ref.id;
+
+        await logActivity({
+          tipo:"presenza",
+          azione:"create",
+          cantiere:att.cantiereNome,
+          targetId:ref.id,
+          note:`${dipendente} • ${data}`
+        });
+
         setLastAddedId(ref.id);
       }
 
-      await logActivity({
-        tipo:"presenza",
-        azione: editingId ? "update" : "create",
-        cantiere:cantiereNome,
-        targetId,
-        note:`${dipendente} • ${data}`
-      });
-
       // reset
+      setAttivitaList([{ cantiereId:"", cantiereNome:"", orario:"06:00-15:00", attivita:"" }]);
       setAttivita("");
       setEditingId(null);
       setTimeout(()=>setLastAddedId(null),1500);
@@ -321,15 +329,23 @@ export default function Presenze(){
   }
 
   function onEdit(r){
+    const gruppo = rows.filter(x => x.data === r.data && x.dipendente === r.dipendente);
+
     setEditingId(r.id);
     setErr("");
     setData(r.data);
     setDipendente(r.dipendente);
-    setCantiereId(String(r.cantiereId || ""));
-    setCantiereNome(r.cantiereNome);
-    setGiornata(r.giornata);
-    setOrario(r.orario);
-    setAttivita(r.attivita || "");
+    const giornataGroup = gruppo.some(g => Number(g.giornata) === 1) ? 1 : 0.5;
+    setGiornata(giornataGroup);
+
+    setAttivitaList(
+      gruppo.map(g => ({
+        cantiereId: g.cantiereId,
+        cantiereNome: g.cantiereNome,
+        orario: g.orario,
+        attivita: g.attivita || ""
+      }))
+    );
   }
 
   /* =========================
@@ -338,7 +354,14 @@ export default function Presenze(){
 
   return(
 
-    <div className="presenze-wrap">
+    <div
+      className="presenze-wrap"
+      style={{
+        width: "100%",
+        maxWidth: "100vw",
+        overflowX: "hidden"
+      }}
+    >
 
       <div className="panel">
 
@@ -375,21 +398,6 @@ export default function Presenze(){
             </div>
 
             <div className="field">
-              <label>Cantiere</label>
-              <select
-                value={cantiereId}
-                onChange={e=>onSelectCantiere(e.target.value)}
-              >
-                <option value="">Seleziona cantiere</option>
-                {cantieriAttivi.map(c=>(
-                  <option key={c.id} value={c.id}>
-                    {c.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="field">
               <label>Tipo giornata</label>
               <select
                 value={giornata}
@@ -400,20 +408,124 @@ export default function Presenze(){
               </select>
             </div>
 
-            <div className="field">
-              <label>Orario</label>
-              <input
-                value={orario}
-                onChange={e=>setOrario(e.target.value)}
-              />
-            </div>
+            {/* MULTI CANTIERE */}
+            <div className="field" style={{gridColumn:"1/-1"}}>
+              <label>Suddivisione giornata (più cantieri)</label>
 
-            <div className="field">
-              <label>Attività (opzionale)</label>
-              <input
-                value={attivita}
-                onChange={e=>setAttivita(e.target.value)}
-              />
+              {attivitaList.map((row,i)=>(
+                <div 
+                  key={i} 
+                  style={{
+                    display:"flex",
+                    flexDirection:"row",
+                    alignItems:"center",
+                    flexWrap:"wrap",
+                    gap:"10px",
+                    marginBottom:"12px",
+                    padding:"10px",
+                    border:"1px solid rgba(255,255,255,0.1)",
+                    borderRadius:"10px"
+                  }}
+                >
+                  <strong>Cantiere {i+1}</strong>
+                  <select
+                    value={row.cantiereId}
+                    onChange={e=>{
+                      const newList=[...attivitaList];
+                      const id=e.target.value;
+                      const found=cantieriAttivi.find(c=>c.id===id);
+                      newList[i].cantiereId=id;
+                      newList[i].cantiereNome=found?.nome||"";
+                      setAttivitaList(newList);
+                    }}
+                    style={{minWidth:"160px", flex:"1"}}
+                  >
+                    <option value="">Seleziona cantiere</option>
+                    {cantieriAttivi.map(c=>(
+                      <option key={c.id} value={c.id}>{c.nome}</option>
+                    ))}
+                  </select>
+                  <input
+                    value={row.orario}
+                    placeholder="Orario (es: 07:00-08:00)"
+                    onChange={e=>{
+                      const newList=[...attivitaList];
+                      newList[i].orario=e.target.value;
+                      setAttivitaList(newList);
+                    }}
+                    style={{minWidth:"130px"}}
+                  />
+                  <input
+                    value={row.attivita}
+                    placeholder="Attività svolta"
+                    onChange={e=>{
+                      const newList=[...attivitaList];
+                      newList[i].attivita=e.target.value;
+                      setAttivitaList(newList);
+                    }}
+                    style={{minWidth:"180px", flex:"2"}}
+                  />
+                  <button
+                    type="button"
+                    disabled={i === 0}
+                    onClick={() => {
+                      if(i === 0) return;
+                      const newList = attivitaList.filter((_, idx) => idx !== i);
+                      setAttivitaList(newList.length ? newList : [{ cantiereId:"", cantiereNome:"", orario:"", attivita:"" }]);
+                    }}
+                    style={{
+                      marginLeft:"auto",
+                      background: i === 0 ? "#555" : "#ef4444",
+                      color:"white",
+                      border:"none",
+                      borderRadius:"6px",
+                      padding:"6px 10px",
+                      fontSize:"12px",
+                      cursor: i === 0 ? "not-allowed" : "pointer",
+                      transition:"all 0.2s ease",
+                      transform:"scale(1)"
+                    }}
+                    onMouseEnter={e => {
+                      if(i === 0) return;
+                      e.currentTarget.style.transform = "scale(1.08)";
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                  >
+                    ❌ Rimuovi cantiere
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={()=>setAttivitaList([
+                  ...attivitaList,
+                  {cantiereId:"", cantiereNome:"", orario:"", attivita:""}
+                ])}
+                style={{
+                  marginTop:"10px",
+                  display:"inline-block",
+                  background:"#22c55e",
+                  color:"white",
+                  border:"none",
+                  borderRadius:"8px",
+                  padding:"8px 14px",
+                  fontWeight:"600",
+                  cursor:"pointer",
+                  transition:"all 0.2s ease",
+                  transform:"scale(1)"
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "scale(1.08)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                ➕ Aggiungi cantiere
+              </button>
+
             </div>
 
           </div>
@@ -426,89 +538,150 @@ export default function Presenze(){
 
         </form>
 
-        <table className="table">
+        <div style={{ width: "100%", overflowX: "auto" }}>
+          <table className="table" style={{ minWidth: "700px" }}>
 
           <thead>
             <tr>
               <th>Data</th>
               <th>Dipendente</th>
-              <th>Cantiere</th>
+              <th>
+                <div style={{display:"grid", gridTemplateColumns:"180px 120px 1fr", gap:"10px"}}>
+                  <span>Cantiere</span>
+                  <span>Orario</span>
+                  <span>Attività</span>
+                </div>
+              </th>
               <th>Giornata</th>
-              <th>Orario</th>
-              <th>Attività</th>
               <th></th>
             </tr>
           </thead>
 
           <tbody>
 
-            {rows.length===0 ? (
-              <tr>
-                <td colSpan="7">Nessuna presenza</td>
-              </tr>
-            ) : rows.map(r=>{
-              const isToday = r.data === data;
-              return (
-              <tr
-                key={r.id}
-                style={{
-                  opacity: r.data===data ? 1 : 0.6
-                }}
-                className={
-                  (r.id===lastAddedId ? "row-new " : "") +
-                  (r.dipendente===dipendente ? "row-selected" : "")
-                }
-              >
-                <td>{formatDateIT(r.data)}</td>
-                <td>{r.dipendente}</td>
-                <td>
-                  {(() => {
-                    const colore = cantieriMap[r.cantiereId]?.colore || getColorFromName(r.cantiereNome);
-                    return (
-                      <span
-                        className="badge"
-                        style={{
-                          background: colore + "22",
-                          border: `1px solid ${colore}`,
-                          color: colore
-                        }}
-                      >
-                        {r.cantiereNome}
-                      </span>
-                    );
-                  })()}
-                </td>
-                <td>
-                  <span className={r.giornata===1 ? "badge badge-green" : "badge"}>
-                    {r.giornata===1?"Intera":"Mezza"}
-                  </span>
-                </td>
-                <td>{r.orario}</td>
-                <td>{r.attivita || "-"}</td>
-                <td>
-                  <button
-                    type="button"
-                    className="btn-ghost"
-                    onClick={()=>onEdit(r)}
-                  >
-                    Modifica
-                  </button>
+            {Object.values(
+              rows.reduce((acc, r) => {
+                const key = r.data + "_" + r.dipendente;
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(r);
+                return acc;
+              }, {})
+            ).map((group, idx) => {
 
-                  <button
-                    type="button"
-                    className="btn-ghost"
-                    onClick={()=>onDelete(r.id)}
-                  >
-                    Elimina
-                  </button>
-                </td>
-              </tr>
+              const first = group[0];
+              const giornataValue = group.some(g => Number(g.giornata) === 1) ? 1 : 0.5;
+
+              return (
+                <tr key={idx}>
+                  <td>{formatDateIT(first.data)}</td>
+                  <td>{first.dipendente}</td>
+
+                  <td>
+                    {[...group]
+                      .sort((a, b) => {
+                        const getStart = (o) => {
+                          if (!o) return 0;
+                          const start = o.split("-")[0];
+                          const [h, m] = start.split(":");
+                          return Number(h) * 60 + Number(m);
+                        };
+                        return getStart(a.orario) - getStart(b.orario);
+                      })
+                      .map((g, i) => {
+                        const colore = cantieriMap[g.cantiereId]?.colore || getColorFromName(g.cantiereNome);
+                        return (
+                          <div
+                            key={i}
+                            style={{
+                              marginBottom: "6px",
+                              display: "grid",
+                              gridTemplateColumns: "180px 120px 1fr",
+                              alignItems: "center",
+                              gap: "10px",
+                              width: "100%"
+                            }}
+                          >
+                            <span
+                              className="badge"
+                              style={{
+                                background: colore + "22",
+                                border: `1px solid ${colore}`,
+                                color: colore,
+                                width: "170px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                display: "inline-block",
+                                textAlign: "center"
+                              }}
+                            >
+                              {g.cantiereNome}
+                            </span>
+                            <strong
+                              style={{
+                                width: "120px",
+                                display: "inline-block",
+                                fontFamily: "monospace",
+                                fontVariantNumeric: "tabular-nums",
+                                textAlign: "left"
+                              }}
+                            >
+                              {g.orario}
+                            </strong>
+                            <span
+                              style={{
+                                display: "block",
+                                whiteSpace: "nowrap",
+                                fontSize: "12px"
+                              }}
+                            >
+                              {g.attivita || "-"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                  </td>
+
+                  <td>
+                    <span className={giornataValue===1 ? "badge badge-green" : "badge"}>
+                      {giornataValue===1 ? "Intera" : "Mezza"}
+                    </span>
+                  </td>
+
+                  <td style={{ display: "flex", gap: "6px" }}>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => onEdit(first)}
+                    >
+                      Modifica
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={async () => {
+                        if(!confirm("Eliminare tutta la giornata?")) return;
+
+                        const gruppo = rows.filter(r => r.data === first.data && r.dipendente === first.dipendente);
+
+                        for(const g of gruppo){
+                          await deleteDoc(doc(db, "presenze", g.id));
+                        }
+                      }}
+                      style={{ color: "#ef4444" }}
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
               );
             })}
 
           </tbody>
 
-        </table>
+          </table>
+        </div>
 
       </div>
 
