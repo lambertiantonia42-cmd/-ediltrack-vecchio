@@ -166,6 +166,14 @@ export default function DashboardHome() {
         @media (max-width: 1000px) {
           .charts-container { grid-template-columns: 1fr; }
         }
+
+        /* Hamburger menu style */
+        .hamburger-menu {
+          position: fixed;
+          top: 15px;
+          left: 15px;
+          z-index: 2000;
+        }
       `}</style>
 
       {/* BLOCCO PULSANTI RAPIDI */}
