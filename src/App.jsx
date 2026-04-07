@@ -31,9 +31,10 @@ export default function App() {
           <Route path="/spese" element={<Spese />} />
           <Route path="/cantieri" element={<Cantieri />} />
           <Route path="/cronologia" element={<Cronologia />} />
-
+          <Route path="/riepilogo-mensile" element={<RiepilogoMensile />} />
           <Route path="/conteggi" element={<Conteggi />} />
           <Route path="/conteggi/:nome" element={<SchedaOperaio />} />
+          <Route path="/operai/:nome" element={<SchedaOperaio />} />
           <Route path="/storico-operaio" element={<StoricoOperaio />} />
           <Route path="/operai" element={<Operai />} />
           <Route path="/snapshot-operaio" element={<SnapshotOperaio />} />

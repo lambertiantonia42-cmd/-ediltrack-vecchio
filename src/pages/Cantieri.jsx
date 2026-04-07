@@ -92,10 +92,14 @@ export default function Cantieri() {
   const [presenzeAll, setPresenzeAll] = useState([]);
   const [speseAll, setSpeseAll] = useState([]);
 
+  // Mobile-only modal for 'Crea nuovo cantiere'
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
   const [err, setErr] = useState("");
 
   const [filtroData, setFiltroData] = useState("");
   const [meseAperto, setMeseAperto] = useState(null);
+  const [sectionOpen, setSectionOpen] = useState("presenze");
 
 const modalRef = useRef(null);
 const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -501,52 +505,56 @@ useEffect(() => {
           <h1 style={{ fontSize: "22px", fontWeight: 700, color: "var(--text-main)" }}>🏗 Gestione cantieri</h1>
         </div>
 
-        {/* CARD 1 - CREAZIONE */}
-        <div className="detail-box" style={{
-          marginBottom:"16px",
-          background:"linear-gradient(135deg, rgba(34,197,94,0.15), rgba(0,0,0,0.4))",
-          border:"1px solid rgba(34,197,94,0.25)",
-          boxShadow:"0 10px 30px rgba(0,0,0,0.12)",
-          borderRadius:"18px",
-          transition:"all .2s ease",
-          padding: isMobile ? "16px" : undefined,
-          width: "100%",
-          marginLeft: undefined,
-          marginRight: undefined,
-          borderRadius: isMobile ? "14px" : undefined,
-        }}>
 
-          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+
+
+        {/* CARD 1 - CREAZIONE */}
+        <div
+          className="detail-box"
+          style={{
+            marginBottom: "16px",
+            background: "linear-gradient(135deg, rgba(34,197,94,0.15), rgba(0,0,0,0.4))",
+            border: "1px solid rgba(34,197,94,0.25)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+            borderRadius: "18px",
+            transition: "all .2s ease",
+            padding: isMobile ? "16px" : undefined,
+            width: "100%",
+            marginLeft: undefined,
+            marginRight: undefined,
+            borderRadius: isMobile ? "14px" : undefined,
+            display: isMobile ? "none" : "block",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <h2 style={{ fontSize: "18px", fontWeight: 600 }}>➕ Aggiungi nuovo cantiere</h2>
               <p className="muted">Inserisci i dati per creare un nuovo cantiere</p>
             </div>
           </div>
 
-          <div className="cantieri-create" style={{marginTop:"12px"}}>
+          <div className="cantieri-create" style={{ marginTop: "12px" }}>
+            <input
+              className="input"
+              placeholder="Nuovo cantiere…"
+              value={nomeNew}
+              onChange={(e) => setNomeNew(e.target.value)}
+            />
 
             <input
-  className="input"
-  placeholder="Nuovo cantiere…"
-  value={nomeNew}
-  onChange={(e) => setNomeNew(e.target.value)}
-/>
+              className="input"
+              placeholder="Indirizzo completo (via + città)"
+              value={indirizzoNew}
+              onChange={(e) => setIndirizzoNew(e.target.value)}
+            />
 
-<input
-  className="input"
-  placeholder="Indirizzo completo (via + città)"
-  value={indirizzoNew}
-  onChange={(e) => setIndirizzoNew(e.target.value)}
-/>
+            <input
+              type="date"
+              className="input"
+              value={dataInizioNew}
+              onChange={(e) => setDataInizioNew(e.target.value)}
+            />
 
-<input
-  type="date"
-  className="input"
-  value={dataInizioNew}
-  onChange={(e) => setDataInizioNew(e.target.value)}
-/>
-
-           
             <button
               className="btn-primary"
               onClick={creaCantiere}
@@ -554,10 +562,19 @@ useEffect(() => {
             >
               {loadingNew ? "Creazione..." : "Crea"}
             </button>
-
           </div>
-
         </div>
+
+        {/* Mobile: button to open modal for nuovo cantiere */}
+        {isMobile && (
+          <button
+            className="btn-primary"
+            style={{ width: "100%", marginBottom: "10px" }}
+            onClick={() => setShowCreateModal(true)}
+          >
+            ➕ Nuovo cantiere
+          </button>
+        )}
 
         <div
           className="cantieri-layout"
@@ -581,7 +598,8 @@ useEffect(() => {
             <div className="detail-box" style={{
               padding: "16px",
               marginTop: "-8px",
-              background:"linear-gradient(135deg, rgba(59,130,246,0.12), rgba(0,0,0,0.4))",
+            background:"linear-gradient(135deg, rgba(59,130,246,0.15), rgba(15,23,42,0.95))",
+            border:"1px solid rgba(59,130,246,0.25)",       
               boxShadow:"0 4px 20px rgba(0,0,0,0.06)",
               border:"1px solid rgba(255,255,255,0.08)",
               backdropFilter:"blur(6px)",
@@ -807,7 +825,7 @@ useEffect(() => {
                   </div>
 
                   {/* stato badge */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-end" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "center", justifyContent: "center" }}>
 
                     <select
                       className="select small"
@@ -854,6 +872,7 @@ useEffect(() => {
                     flexWrap: isMobile ? "nowrap" : "wrap",
                     marginTop: "12px",
                     justifyContent: isMobile ? "space-between" : undefined,
+                    marginBottom: isMobile ? "10px" : undefined
                   }}
                 >
                   <div
@@ -917,87 +936,102 @@ useEffect(() => {
                 </div>
 
                 {/* 🔥 TABELLA COMPLETA PRESENZE */}
-                <div className="detail-box" style={{
-                  marginTop: "16px",
-                  background:"linear-gradient(135deg, rgba(251,146,60,0.12), rgba(0,0,0,0.3))",
-                  padding: isMobile ? "16px" : undefined,
-                  width:"100%",
-                  marginLeft: undefined,
-                  marginRight: undefined,
-                  borderRadius: isMobile ? "14px" : undefined,
-                }}>
-
-                  <div className="detail-box-title">
-                    📋 Tutte le presenze cantiere
-                  </div>
-
-                  {/* FILTRI + CONTROLLO */}
-                  <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap", alignItems:"center" }}>
-                    <span style={{fontSize:"12px", opacity:0.6}}>📅 Filtra per mese</span>
-
-                    <input
-                      type="month"
-                      className="input"
-                      value={filtroData}
-                      onChange={(e) => setFiltroData(e.target.value)}
+                <div
+                  className="detail-box"
+                  style={{
+                    marginTop: "16px",
+                    background:"linear-gradient(135deg, rgba(59,130,246,0.18), rgba(15,23,42,0.95))",
+                    border:"1px solid rgba(59,130,246,0.25)",
+                    padding: isMobile ? "16px" : undefined,
+                    width:"100%",
+                    borderRadius: isMobile ? "14px" : undefined,
+                    cursor: "pointer",
+                    transition: "transform .12s ease, box-shadow .12s ease",
+                  }}
+                  onClick={() => setSectionOpen(sectionOpen === "presenze" ? null : "presenze")}
+                  onMouseDown={(e)=> e.currentTarget.style.transform = "scale(0.99)"}
+                  onMouseUp={(e)=> e.currentTarget.style.transform = "scale(1)"}
+                  onMouseLeave={(e)=> e.currentTarget.style.transform = "scale(1)"}
+                >
+                  <div className="detail-box-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span>📋 Presenze</span>
+                    <span
                       style={{
-                        minWidth:"160px",
-                        textAlign:"center",
-                        fontWeight:600,
-                        letterSpacing:"1px",
-                        background:"rgba(255,255,255,0.06)"
+                        transition: "transform .2s ease, opacity .2s ease",
+                        transform: sectionOpen === "presenze" ? "rotate(180deg)" : "rotate(0deg)",
+                        opacity: 0.8
                       }}
-                    />
-
-
+                    >▾</span>
                   </div>
 
-                  {presenzeSelected.length === 0 ? (
-                    <p className="dim">Nessuna presenza</p>
-                  ) : (
-                    <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
-                      {Object.entries(
-                        presenzeSelected.reduce((acc, p) => {
-                          const mese = (p.data || "").slice(0,7); // YYYY-MM
-                          if (!acc[mese]) acc[mese] = [];
-                          acc[mese].push(p);
-                          return acc;
-                        }, {})
-                      )
-                        .sort((a,b)=> b[0].localeCompare(a[0]))
-                        .map(([mese, listaMese]) => {
+                  {sectionOpen === "presenze" && (
+                    <>
+                      {/* FILTRI + CONTROLLO */}
+                      <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap", alignItems:"center" }}>
+                        <span style={{fontSize:"12px", opacity:0.6}}>📅 Filtra per mese</span>
 
-                          const labelMese = (() => {
-                            if(!mese) return "-";
-                            const [y,m] = mese.split("-");
-                            const d = new Date(y, m-1);
-                            return d.toLocaleDateString("it-IT", { month:"long", year:"numeric" });
-                          })();
+                        <input
+                          type="month"
+                          className="input"
+                          value={filtroData}
+                          onChange={(e) => setFiltroData(e.target.value)}
+                          style={{
+                            minWidth:"160px",
+                            textAlign:"center",
+                            fontWeight:600,
+                            letterSpacing:"1px",
+                            background:"rgba(255,255,255,0.06)"
+                          }}
+                        />
+                      </div>
 
-                          return (
-                            <div key={mese} style={{
-                              background: "var(--bg-card)",
-                              borderRadius: "14px",
-                              padding: "12px",
-                              border: "1px solid rgba(255,255,255,0.08)"
-                            }}>
-                              <div
-                                onClick={() => setMeseAperto(mese)}
-                                style={{
-                                  cursor:"pointer",
-                                  fontWeight:700,
-                                  fontSize:"15px"
-                                }}
-                              >
-                                📅 {labelMese}
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
+                      {presenzeSelected.length === 0 ? (
+                        <p className="dim">Nessuna presenza</p>
+                      ) : (
+                        <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
+                          {Object.entries(
+                            presenzeSelected.reduce((acc, p) => {
+                              const mese = (p.data || "").slice(0,7); // YYYY-MM
+                              if (!acc[mese]) acc[mese] = [];
+                              acc[mese].push(p);
+                              return acc;
+                            }, {})
+                          )
+                            .sort((a,b)=> b[0].localeCompare(a[0]))
+                            .map(([mese, listaMese]) => {
+
+                              const labelMese = (() => {
+                                if(!mese) return "-";
+                                const [y,m] = mese.split("-");
+                                const d = new Date(y, m-1);
+                                return d.toLocaleDateString("it-IT", { month:"long", year:"numeric" });
+                              })();
+
+                              return (
+                                <div key={mese} style={{
+                                  background: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(15,23,42,0.95))",
+                                  border: "1px solid rgba(59,130,246,0.25)",
+                                  boxShadow: "0 8px 25px rgba(0,0,0,0.25)",
+                                  padding: "14px",
+                                  borderRadius: "14px"
+                                }}>
+                                  <div
+                                    onClick={() => setMeseAperto(mese)}
+                                    style={{
+                                      cursor:"pointer",
+                                      fontWeight:700,
+                                      fontSize:"15px"
+                                    }}
+                                  >
+                                    📅 {labelMese}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      )}
+                    </>
                   )}
-
-
                 </div>
 
                 {/* MODAL PRESENZE MENSILI */}
@@ -1091,95 +1125,143 @@ useEffect(() => {
                 )}
 
                 {/* SPESE */}
-                <div className="detail-box" style={{
-                  marginTop: "16px",
-                  background:"linear-gradient(135deg, rgba(239,68,68,0.12), rgba(0,0,0,0.3))",
-                  padding: isMobile ? "16px" : undefined,
-                  width:"100%",
-                  marginLeft: undefined,
-                  marginRight: undefined,
-                  borderRadius: isMobile ? "14px" : undefined,
-                }}>
-
-                  <div className="detail-box-title">
-                    💸 Spese cantiere
+                <div
+                  className="detail-box"
+                  style={{
+                    marginTop: "16px",
+                    background:"linear-gradient(135deg, rgba(239,68,68,0.18), rgba(15,23,42,0.95))",
+                    border:"1px solid rgba(239,68,68,0.25)",
+                    padding: isMobile ? "16px" : undefined,
+                    width:"100%",
+                    borderRadius: isMobile ? "14px" : undefined,
+                    cursor: "pointer",
+                    transition: "transform .12s ease, box-shadow .12s ease",
+                  }}
+                  onClick={() => setSectionOpen(sectionOpen === "spese" ? null : "spese")}
+                  onMouseDown={(e)=> e.currentTarget.style.transform = "scale(0.99)"}
+                  onMouseUp={(e)=> e.currentTarget.style.transform = "scale(1)"}
+                  onMouseLeave={(e)=> e.currentTarget.style.transform = "scale(1)"}
+                >
+                  <div className="detail-box-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span>💸 Spese</span>
+                    <span
+                      style={{
+                        transition: "transform .2s ease, opacity .2s ease",
+                        transform: sectionOpen === "spese" ? "rotate(180deg)" : "rotate(0deg)",
+                        opacity: 0.8
+                      }}
+                    >▾</span>
                   </div>
 
-                  {speseSelected.length === 0 ? (
-                    <p className="dim">Nessuna spesa</p>
-                  ) : isMobile ? (
-                    <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                      {speseSelected.map((s) => (
-                        <div key={s.id} style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                          padding: "14px",
-                          borderRadius: "14px",
-                          background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(30,41,59,0.9))",
-                          border: "1px solid rgba(239,68,68,0.25)",
-                          boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-                          position: "relative"
-                        }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "6px" }}>
-                            <span style={{ fontWeight: 600, fontSize: "14px" }}>
-                              {(() => {
-                                if (!s.data) return "-";
-                                const [y,m,d] = s.data.split("-");
-                                return `${d}/${m}/${y}`;
-                              })()}
-                            </span>
-                            <span style={{
-                              color: "#ef4444",
-                              fontWeight: 700,
-                              fontSize: isMobile ? "16px" : "15px"
+                  {sectionOpen === "spese" && (
+                    <>
+                      {speseSelected.length === 0 ? (
+                        <p className="dim">Nessuna spesa</p>
+                      ) : isMobile ? (
+                        <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                          {speseSelected.map((s) => (
+                            <div key={s.id} style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                              padding: "14px",
+                              borderRadius: "14px",
+                              background: "linear-gradient(135deg, rgba(239,68,68,0.18), rgba(15,23,42,0.95))",
+                              boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                              border: "1px solid rgba(239,68,68,0.25)",
+                              boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                              position: "relative"
                             }}>
-                              € {Number(s.importo || 0).toFixed(2)}
-                            </span>
-                          </div>
-                          {s.fornitore && (
-                            <div style={{ fontSize: "13px", opacity: 0.8 }}>
-                              🏢 {s.fornitore}
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "6px" }}>
+                                <span style={{ fontWeight: 600, fontSize: "14px" }}>
+                                  {(() => {
+                                    if (!s.data) return "-";
+                                    const [y,m,d] = s.data.split("-");
+                                    return `${d}/${m}/${y}`;
+                                  })()}
+                                </span>
+                                <span style={{
+                                  color: "#ef4444",
+                                  fontWeight: 700,
+                                  fontSize: isMobile ? "16px" : "15px"
+                                }}>
+                                  € {Number(s.importo || 0).toFixed(2)}
+                                </span>
+                              </div>
+                              {s.fornitore && (
+                                <div style={{ fontSize: "13px", opacity: 0.8 }}>
+                                  🏢 {s.fornitore}
+                                </div>
+                              )}
+                              {s.descrizione && (
+                                <div style={{ fontSize: "13px", opacity: 0.85, lineHeight: "1.4" }}>
+                                  {s.descrizione}
+                                </div>
+                              )}
                             </div>
-                          )}
-                          {s.descrizione && (
-                            <div style={{ fontSize: "13px", opacity: 0.85, lineHeight: "1.4" }}>
-                              {s.descrizione}
-                            </div>
-                          )}
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <table className="table" style={{ marginTop: "10px" }}>
-                      <thead>
-                        <tr>
-                          <th>Data</th>
-                          <th>Importo</th>
-                          <th>Fornitore</th>
-                          <th>Descrizione</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {speseSelected.map((s) => (
-                          <tr key={s.id}>
-                            <td>{(() => {
-                              if (!s.data) return "-";
-                              const [y,m,d] = s.data.split("-");
-                              return `${d}/${m}/${y}`;
-                            })()}</td>
-                            <td>€ {Number(s.importo || 0).toFixed(2)}</td>
-                            <td>{s.fornitore || "-"}</td>
-                            <td>{s.descrizione || "-"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                      ) : (
+                        <table className="table" style={{ marginTop: "10px" }}>
+                          <thead>
+                            <tr>
+                              <th>Data</th>
+                              <th>Importo</th>
+                              <th>Fornitore</th>
+                              <th>Descrizione</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {speseSelected.map((s) => (
+                              <tr key={s.id}>
+                                <td>{(() => {
+                                  if (!s.data) return "-";
+                                  const [y,m,d] = s.data.split("-");
+                                  return `${d}/${m}/${y}`;
+                                })()}</td>
+                                <td>€ {Number(s.importo || 0).toFixed(2)}</td>
+                                <td>{s.fornitore || "-"}</td>
+                                <td>{s.descrizione || "-"}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </>
                   )}
-
                 </div>
                 {/* Mobile: info block */}
-                {isMobile && infoBlock}
+                {isMobile && (
+                  <div
+                    className="detail-box"
+                    style={{
+                      marginTop: "16px",
+                      background:"linear-gradient(135deg, rgba(148,163,184,0.15), rgba(15,23,42,0.95))",
+                      border:"1px solid rgba(148,163,184,0.25)",
+                      padding: "16px",
+                      borderRadius: "14px",
+                      cursor: "pointer",
+                      transition: "transform .12s ease, box-shadow .12s ease",
+                    }}
+                    onClick={() => setSectionOpen(sectionOpen === "info" ? null : "info")}
+                    onMouseDown={(e)=> e.currentTarget.style.transform = "scale(0.99)"}
+                    onMouseUp={(e)=> e.currentTarget.style.transform = "scale(1)"}
+                    onMouseLeave={(e)=> e.currentTarget.style.transform = "scale(1)"}
+                  >
+                    <div className="detail-box-title" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span>ℹ️ Info cantiere</span>
+                      <span
+                        style={{
+                          transition: "transform .2s ease, opacity .2s ease",
+                          transform: sectionOpen === "info" ? "rotate(180deg)" : "rotate(0deg)",
+                          opacity: 0.8
+                        }}
+                      >▾</span>
+                    </div>
+
+                    {sectionOpen === "info" && infoBlock}
+                  </div>
+                )}
               </>
             )}
             </div>
@@ -1188,6 +1270,93 @@ useEffect(() => {
         </div>
 
       </div>
+      {/* Mobile-only modal for nuovo cantiere */}
+      {isMobile && showCreateModal && (
+        <div
+          onClick={() => setShowCreateModal(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "90%",
+              maxWidth: "420px",
+              margin: "0 auto",
+              borderRadius: "18px",
+              padding: "16px",
+              boxShadow: "0 -10px 40px rgba(0,0,0,0.6)",
+              background: "#0f172a",
+              border: "1px solid rgba(255,255,255,0.08)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center"
+            }}
+          >
+            <div style={{ fontWeight: 700, marginBottom: "12px", fontSize: "16px" }}>
+              ➕ Nuovo cantiere
+            </div>
+            <div style={{ fontSize: "12px", opacity: 0.7, width: "100%", textAlign: "left" }}>
+              Inserisci il nome del cantiere
+            </div>
+            <input
+              className="input"
+              placeholder="Nome cantiere"
+              value={nomeNew}
+              onChange={(e) => setNomeNew(e.target.value)}
+              style={{ width: "100%", textAlign: "center" }}
+            />
+            <div style={{ fontSize: "12px", opacity: 0.7, width: "100%", textAlign: "left", marginTop: "6px" }}>
+              Inserisci l'indirizzo (es. Via Roma, Agropoli)
+            </div>
+            <input
+              className="input"
+              placeholder="Indirizzo completo"
+              value={indirizzoNew}
+              onChange={(e) => setIndirizzoNew(e.target.value)}
+              style={{ width: "100%", textAlign: "center", marginTop: "6px" }}
+            />
+            <div style={{ fontSize: "12px", opacity: 0.7, width: "100%", textAlign: "left", marginTop: "6px" }}>
+              Data attivazione
+            </div>
+            <input
+              type="date"
+              className="input"
+              value={dataInizioNew}
+              onChange={(e) => setDataInizioNew(e.target.value)}
+              style={{ width: "100%", textAlign: "center", marginTop: "6px" }}
+            />
+
+            <div style={{ display: "flex", gap: "10px", marginTop: "12px", width: "100%" }}>
+              <button
+                className="btn-primary"
+                style={{ flex: 1 }}
+                onClick={async () => {
+                  await creaCantiere();
+                  setShowCreateModal(false);
+                }}
+              >
+                Crea
+              </button>
+
+              <button
+                className="btn-ghost"
+                style={{ flex: 1 }}
+                onClick={() => setShowCreateModal(false)}
+              >
+                Annulla
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

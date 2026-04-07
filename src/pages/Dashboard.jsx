@@ -149,20 +149,27 @@ export default function DashboardLayout() {
         .logout-btn {
           width: 100%;
           padding: 18px;
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.2);
-          color: #f87171;
+          background: linear-gradient(135deg, rgba(239,68,68,0.25), rgba(127,29,29,0.6));
+          border: 1px solid rgba(239, 68, 68, 0.4);
+          color: #ffffff;
           border-radius: 16px;
           font-size: 18px;
-          font-weight: 800;
+          font-weight: 900;
           cursor: pointer;
           transition: 0.3s;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
+          letter-spacing: 1px;
         }
-        .logout-btn:hover { background: #ef4444; color: #fff; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
+
+        .logout-btn:hover {
+          background: linear-gradient(135deg, #ef4444, #b91c1c);
+          color: #fff;
+          box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+          transform: translateY(-2px);
+        }
 
         /* HEADER SUPERIORE */
         .topbar {
@@ -305,7 +312,7 @@ export default function DashboardLayout() {
             onClick={() => isMobile && setMenuOpen(false)}
             className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
           >
-            <span>🧾</span> Riepilogo Mensile
+            <span>📊</span> Riepilogo Mensile
           </NavLink>
         </nav>
 
@@ -358,7 +365,7 @@ export default function DashboardLayout() {
               </button>
             )}
             <h1 style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "6px" }}>
+              <div style={{ display: "flex", flexWrap: "nowrap", justifyContent: "center", alignItems: "center", gap: "6px" }}>
                 <span
                   style={{
                     ...(isMobile
@@ -385,7 +392,6 @@ export default function DashboardLayout() {
                 >
                   {name}
                 </span>
-                <span style={{ marginLeft: "6px" }}>👋</span>
               </div>
             </h1>
             <p className="subtitle">

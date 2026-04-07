@@ -47,6 +47,9 @@ export default function DashboardHome() {
         }
 
         .quick-card { 
+        .grey {
+          background: linear-gradient(135deg, #312e81, #1e293b);
+        }
           position: relative;
           background: #1e293b;
           padding: 25px;
@@ -94,10 +97,11 @@ export default function DashboardHome() {
           height: 5px;
           width: 100%;
         }
-        .yellow .card-accent { background: #fbbf24; }
-        .blue .card-accent { background: #60a5fa; }
-        .green .card-accent { background: #34d399; }
-        .purple .card-accent { background: #a78bfa; }
+        .yellow .card-accent { background: #f97316; }   /* Presenze → arancione */
+        .blue .card-accent { background: #ef4444; }     /* Spese → rosso */
+        .green .card-accent { background: #22c55e; }    /* Cantieri → verde */
+        .purple .card-accent { background: #3b82f6; }   /* Operai → blu */
+        .grey .card-accent { background: #8b5cf6; }     /* Riepilogo → viola */
 
         /* MAPPA */
         .map-section {
@@ -168,7 +172,7 @@ export default function DashboardHome() {
       <div className="quick-actions">
         <div className="quick-card yellow" onClick={() => navigate("/presenze")}>
           <h3>📒 PRESENZE</h3>
-          <p>Gestione operai odierna</p>
+          <p>Gestione operai giornaliera</p>
           <div className="card-accent"></div>
         </div>
         <div className="quick-card blue" onClick={() => navigate("/spese")}>
@@ -178,12 +182,21 @@ export default function DashboardHome() {
         </div>
         <div className="quick-card green" onClick={() => navigate("/cantieri")}>
           <h3>🏗️ CANTIERI</h3>
-          <p>Anagrafica e mappe</p>
+          <p>Cantieri e avanzamento lavori</p>
           <div className="card-accent"></div>
         </div>
-        <div className="quick-card purple" onClick={() => navigate("/operai")}>
-          <h3>👷 OPERAI</h3>
-          <p>Stipendi e documenti</p>
+        <div className="quick-card purple" onClick={() => navigate("/conteggi")}>
+          <h3>💰 CONTEGGI</h3>
+          <p>Pagamenti e riepiloghi</p>
+          <div className="card-accent"></div>
+        </div>
+        <div
+          className="quick-card grey"
+          onClick={() => navigate("/riepilogo-mensile")}
+          style={{cursor:"pointer"}}
+        >
+          <h3>📊 RIEPILOGO MENSILE</h3>
+          <p>Analisi mensile operai</p>
           <div className="card-accent"></div>
         </div>
       </div>

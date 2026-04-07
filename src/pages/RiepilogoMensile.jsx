@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { db } from "../services/firebase";
 import { collection, getDocs, query, where, onSnapshot } from "firebase/firestore";
 
@@ -12,6 +13,20 @@ export default function RiepilogoMensile() {
   const [cantieri, setCantieri] = useState([]);
   const [matrix, setMatrix] = useState({});
   const [settimaneList, setSettimaneList] = useState([]);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  const [operaioModal, setOperaioModal] = useState(null);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     carica();
@@ -189,11 +204,102 @@ operaiSnap.forEach(doc => {
   return (
     <div id="riepilogo-print" style={{
       width: "100%",
-      overflowX: "hidden"
+      overflowX: "hidden",
+      paddingBottom: "120px" // spazio extra per vedere bene i totali su mobile
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <h2 style={{ textAlign: "center", margin: 0 }}>
+      {/* HEADER iOS STYLE */}
+      {isMobile && (<div style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        backdropFilter: "blur(12px)",
+        background: "rgba(2,6,23,0.7)",
+        padding: "12px 10px",
+        marginBottom: 10,
+        borderBottom: "1px solid rgba(255,255,255,0.06)"
+      }}>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
+          <div style={{
+            fontSize: 22,
+            fontWeight: 800,
+            color: "#e2e8f0",
+            letterSpacing: "0.3px"
+          }}>
+            Riepilogo Mensile
+          </div>
+
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginTop: 6
+          }}>
+            <span style={{
+              fontSize: 12,
+              background: "rgba(251,191,36,0.15)",
+              color: "#fbbf24",
+              padding: "4px 10px",
+              borderRadius: 999
+            }}>
+              Lun–Sab
+            </span>
+
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8
+            }}>
+              <button onClick={() => setAnno(anno - 1)} style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "none",
+                borderRadius: 8,
+                padding: "4px 8px",
+                color: "#fff"
+              }}>←</button>
+
+              <span style={{ fontWeight: 600 }}>{anno}</span>
+
+              <button onClick={() => setAnno(anno + 1)} style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "none",
+                borderRadius: 8,
+                padding: "4px 8px",
+                color: "#fff"
+              }}>→</button>
+            </div>
+          </div>
+        </div>
+      </div>)}
+      {/* DESKTOP HEADER */}
+      {!isMobile && (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: 20,
+          gap: isMobile ? 10 : 0,
+          textAlign: isMobile ? "center" : "left"
+        }}
+        className="riepilogo-header"
+      >
+        {/* TITOLO + BADGE */}
+        <div
+          className="header-left"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: isMobile ? "6px" : "10px",
+            flexDirection: isMobile ? "column" : "row"
+          }}
+        >
+          <h2 style={{ margin: 0 }}>
             🧾 Riepilogo Mensile
           </h2>
 
@@ -209,12 +315,22 @@ operaiSnap.forEach(doc => {
               fontWeight: 600,
               cursor: "help"
             }}
+            className="badge-lunsab"
           >
             Lun–Sab
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {/* ANNO */}
+        <div
+          className="header-year"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            justifyContent: "center"
+          }}
+        >
           <button
             onClick={() => setAnno(anno - 1)}
             style={{
@@ -248,6 +364,7 @@ operaiSnap.forEach(doc => {
           </button>
         </div>
       </div>
+      )}
 
       {/* SELEZIONE */}
       <div style={{
@@ -324,20 +441,24 @@ operaiSnap.forEach(doc => {
               key={week}
               onClick={() => setSettimana(index)}
               style={{
-                padding: "6px 12px",
+                padding: "10px 14px",
+                minWidth: "95px",
                 background: settimana === index ? "#fbbf24" : "transparent",
                 color: settimana === index ? "#000" : "#cbd5f5",
                 border: settimana === index ? "none" : "1px solid #334155",
                 borderRadius: 6,
                 cursor: "pointer",
                 fontWeight: settimana === index ? 600 : 400,
-                transition: "all 0.15s ease"
+                transition: "all 0.15s ease",
+                whiteSpace: "nowrap",
               }}
             >
-              {`Set ${index}`}
-              <span style={{ opacity: 0.6, marginLeft: 6 }}>
-                ({format(lunedi)}-{format(fineSettimana)})
-              </span>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: "1.2" }}>
+                <span style={{ fontSize: "14px", fontWeight: 600 }}>{`Settimana ${index}`}</span>
+                <span style={{ opacity: 0.7, fontSize: "12px" }}>
+                  {`${format(lunedi)}-${format(fineSettimana)}`}
+                </span>
+              </div>
             </button>
           );
         })}
@@ -357,10 +478,17 @@ operaiSnap.forEach(doc => {
               background:"rgba(255,255,255,0.04)",
               width:"100%",
               maxWidth:"100%",
-              overflow:"hidden"
+              overflow:"hidden",
+              transition:"all 0.25s ease",
+              transform:"translateY(0)",
+              animation:"fadeInUp 0.4s ease"
             }}>
 
-              <div style={{ fontWeight:700, fontSize:18, marginBottom:10 }}>
+              <div
+                onClick={() => setOperaioModal(o)}
+                style={{ fontWeight:700, fontSize:18, marginBottom:10, cursor:"pointer" }}
+                title="Apri scheda operaio"
+              >
                 👷 {o}
               </div>
 
@@ -376,14 +504,19 @@ operaiSnap.forEach(doc => {
                     marginBottom:6,
                     gap:8
                   }}>
-                    <span style={{
-                      opacity:0.85,
-                      fontSize:13,
-                      whiteSpace:"nowrap",
-                      overflow:"hidden",
-                      textOverflow:"ellipsis",
-                      maxWidth:"65%"
-                    }} title={c}>
+                    <span
+                      onClick={() => navigate(`/cantieri?nome=${encodeURIComponent(c)}`)}
+                      style={{
+                        opacity:0.85,
+                        fontSize:13,
+                        whiteSpace:"nowrap",
+                        overflow:"hidden",
+                        textOverflow:"ellipsis",
+                        maxWidth:"65%",
+                        cursor:"pointer"
+                      }}
+                      title={c}
+                    >
                       {c}
                     </span>
 
@@ -426,7 +559,7 @@ operaiSnap.forEach(doc => {
         width: "100%",
         maxWidth: "100%"
       }}>
-        <table style={{ width: "100%", minWidth: "800px", borderCollapse: "collapse", tableLayout: "fixed", position: "relative" }}>
+        <table style={{ width: "100%", minWidth: "900px", borderCollapse: "collapse", tableLayout: "auto", position: "relative" }}>
           <thead>
             <tr style={{ background: "#020617", color: "#fbbf24" }}>
               <th style={{
@@ -434,7 +567,10 @@ operaiSnap.forEach(doc => {
                 position: "sticky",
                 left: 0,
                 zIndex: 3,
-                background: "#020617"
+                background: "#020617",
+                minWidth: "140px",
+                maxWidth: "160px",
+                width: "150px"
               }}>
                 Operaio
               </th>
@@ -450,6 +586,7 @@ operaiSnap.forEach(doc => {
                     }}
                   >
                     <span
+                      onClick={() => navigate(`/cantieri?nome=${encodeURIComponent(c)}`)}
                       style={{
                         padding: "4px 8px",
                         borderRadius: "999px",
@@ -461,8 +598,10 @@ operaiSnap.forEach(doc => {
                         display: "inline-block",
                         maxWidth: "120px",
                         textAlign: "center",
-                        lineHeight: "1.2"
+                        lineHeight: "1.2",
+                        cursor: "pointer"
                       }}
+                      title="Apri cantiere"
                     >
                       {c}
                     </span>
@@ -479,13 +618,24 @@ operaiSnap.forEach(doc => {
 
               return (
                 <tr key={o}>
-                  <td style={{
-                    ...td,
-                    position: "sticky",
-                    left: 0,
-                    zIndex: 2,
-                    background: "#0f172a"
-                  }}>
+                  <td
+                    onClick={() => setOperaioModal(o)}
+                    style={{
+                      ...td,
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 2,
+                      background: "#0f172a",
+                      cursor: "pointer",
+                      minWidth: "140px",
+                      maxWidth: "160px",
+                      width: "150px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    }}
+                    title="Apri scheda operaio"
+                  >
                     👷 {o}
                   </td>
 
@@ -593,6 +743,124 @@ operaiSnap.forEach(doc => {
           </tbody>
         </table>
       </div>
+      {/* MODAL OPERAIO */}
+      {operaioModal && (
+        <div
+          onClick={() => setOperaioModal(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.6)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#020617",
+              padding: "20px",
+              borderRadius: "16px",
+              width: "90%",
+              maxWidth: "400px",
+              color: "white",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+              animation: "fadeInUp 0.25s ease"
+            }}
+          >
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>👷 {operaioModal}</div>
+              <div style={{ fontSize: 13, opacity: 0.6 }}>Anteprima attività</div>
+            </div>
+
+            <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+              {cantieri.map(c => {
+                const val = matrix[operaioModal]?.[c] || 0;
+                if (val === 0) return null;
+
+                return (
+                  <div key={c} style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "8px 0",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)"
+                  }}>
+                    <span style={{ fontSize: 13, opacity: 0.8 }}>{c}</span>
+                    <span style={{
+                      fontWeight: 700,
+                      color: val === 0.5 ? "#fbbf24" : "#22c55e"
+                    }}>
+                      {val}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{
+              marginTop: 12,
+              paddingTop: 10,
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+              display: "flex",
+              justifyContent: "space-between",
+              fontWeight: 700,
+              color: "#fbbf24"
+            }}>
+              <span>Totale</span>
+              <span>
+                {cantieri.reduce((acc, c) => acc + (matrix[operaioModal]?.[c] || 0), 0)}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+              <button
+                onClick={() => {
+                  try {
+                    navigate(`/operai/${encodeURIComponent(operaioModal)}`);
+                  } catch (e) {
+                    console.error("Route non trovata, apro solo modal", e);
+                    setOperaioModal(null);
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: "10px",
+                  border: "none",
+                  background: "#1e293b",
+                  color: "white",
+                  fontWeight: 600,
+                  cursor: "pointer"
+                }}
+              >
+                Vai alla scheda
+              </button>
+
+              <button
+                onClick={() => setOperaioModal(null)}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: "10px",
+                  border: "none",
+                  background: "#fbbf24",
+                  color: "black",
+                  fontWeight: 600,
+                  cursor: "pointer"
+                }}
+              >
+                Chiudi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -645,6 +913,45 @@ const td = {
 <style>{`
 @media (max-width: 768px) {
 
+  /* HEADER MOBILE */
+  .riepilogo-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .header-left {
+    flex-direction: column !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+
+  .header-left h2 {
+    font-size: 20px;
+  }
+
+  /* Lun-Sab sotto il titolo */
+  .badge-lunsab {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  /* ANNO sotto Lun-Sab */
+  .header-year {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .header-year div {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  /* TABELLA SCORRIMENTO */
   .desktop-riepilogo {
     display: block !important;
     overflow-x: auto;
@@ -652,12 +959,38 @@ const td = {
   }
 
   .desktop-riepilogo table {
-    min-width: 900px;
+    min-width: 1100px;
+  }
+
+  .desktop-riepilogo th:first-child,
+  .desktop-riepilogo td:first-child {
+    min-width: 130px !important;
+    max-width: 150px !important;
+    width: 140px !important;
   }
 
   .mobile-riepilogo {
     display: none !important;
   }
 
+  /* spazio finale scroll mobile */
+  #riepilogo-print {
+    padding-bottom: 140px !important;
+  }
+
+  .desktop-riepilogo {
+    padding-bottom: 140px;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 `}</style>

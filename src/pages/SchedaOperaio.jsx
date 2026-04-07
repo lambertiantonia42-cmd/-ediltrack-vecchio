@@ -193,17 +193,34 @@ export default function SchedaOperaio() {
   }
 
   return (
-    <div className="scheda-operaio" style={{ padding: "30px", background: "var(--bg-main)", minHeight: "100vh", color: "var(--text-main)" }}>
+    <div className="scheda-operaio" style={{ padding: window.innerWidth < 768 ? "15px" : "30px", background: "var(--bg-main)", minHeight: "100vh", color: "var(--text-main)" }}>
       
       {/* HEADER */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "25px" }}>
+      <div style={{
+        display: "flex",
+        flexDirection: window.innerWidth < 768 ? "column" : "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: window.innerWidth < 768 ? "15px" : "0px",
+        marginBottom: "25px"
+      }}>
         <div>
           <button onClick={() => navigate(-1)} style={{ background: "none", border: "none", cursor: "pointer", marginBottom: "10px", color: "#666", fontWeight: "600" }}>← INDIETRO</button>
           <h2 style={{ fontSize: "32px", margin: 0, color: "var(--text-main)" }}>👷 {nome?.toUpperCase()}</h2>
           <p style={{ opacity: 0.7, margin: 0, color: "var(--text-main)" }}>Gestione Documentale ed Economica</p>
         </div>
 
-        <div style={{ background: "var(--bg-card)", padding: "15px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{
+          width: window.innerWidth < 768 ? "100%" : "auto",
+          background: "var(--bg-card)",
+          padding: "15px",
+          borderRadius: "12px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          display: "flex",
+          justifyContent: window.innerWidth < 768 ? "space-between" : "center",
+          alignItems: "center",
+          gap: "10px"
+        }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <label style={{ fontSize: "11px", fontWeight: "bold", color: "#888" }}>PAGA GIORNALIERA</label>
             <input 
@@ -244,19 +261,38 @@ export default function SchedaOperaio() {
       </div>
 
       {/* RIEPILOGO STATS */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px", marginBottom: "30px" }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: window.innerWidth < 768 ? "1fr 1fr" : "repeat(4, 1fr)",
+        gap: "15px",
+        marginBottom: "30px"
+      }}>
         <StatBox label="GIORNATE TOTALI" value={`${giorniInteri + giorniMezzi * 0.5} gg`} sub={`${giorniInteri} intere / ${giorniMezzi} mezze`} color="var(--text-main)" />
         <StatBox label="MATURATO LORDO" value={`€ ${guadagno.toFixed(2)}`} sub="Totale lordo lavoro" color="#22c55e" />
         <StatBox label="ACCONTI VERSATI" value={`€ ${totaleAcconti.toFixed(2)}`} sub="Totale pagamenti" color="#f0b90b" />
         <StatBox label="SALDO RESIDUO" value={`€ ${saldo.toFixed(2)}`} sub="Debito attuale" color={saldo > 0 ? "#ef4444" : "#22c55e"} bg={saldo > 0 ? "rgba(255,0,0,0.08)" : "rgba(0,255,150,0.08)"} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: "25px" }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: window.innerWidth < 768 ? "1fr" : "1.6fr 1fr",
+        gap: "25px"
+      }}>
         
         {/* TABELLA PRESENZE */}
-        <div style={{ background: "var(--bg-card)", padding: "20px", borderRadius: "15px", boxShadow: "0 4px 15px rgba(0,0,0,0.03)" }}>
+        <div style={{
+          background: "var(--bg-card)",
+          padding: window.innerWidth < 768 ? "15px" : "20px",
+          borderRadius: "15px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.03)",
+          overflowX: "auto"
+        }}>
           <h3 style={{ marginBottom: "20px", color: "var(--text-main)" }}>📋 Registro Attività Cantiere</h3>
-          <table style={{ width: "100%", borderCollapse: "collapse", color: "var(--text-main)" }}>
+          <table style={{
+            width: window.innerWidth < 768 ? "700px" : "100%",
+            borderCollapse: "collapse",
+            color: "var(--text-main)"
+          }}>
             <thead>
               <tr style={{ textAlign: "left", color: "var(--text-main)", fontSize: "12px", borderBottom: "2px solid var(--bg-main)" }}>
                 <th style={{ padding: "12px" }}>DATA</th>
