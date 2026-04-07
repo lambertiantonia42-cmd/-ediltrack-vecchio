@@ -223,43 +223,6 @@ export default function DashboardHome() {
           ))}
         </MapContainer>
       </div>
-
-      {/* BLOCCO ANALISI */}
-      <div className="charts-container">
-        <div className="chart-box">
-          <h3>📊 Presenze Settimanali</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={presenzeData}>
-              <XAxis dataKey="day" stroke="#94a3b8" axisLine={false} tickLine={false} dy={10} tick={{fontWeight: 'bold'}} />
-              <YAxis hide />
-              <Tooltip 
-                cursor={{fill: 'transparent'}}
-                contentStyle={{background: '#0f172a', border: 'none', borderRadius: '10px', boxShadow: '0 10px 15px rgba(0,0,0,0.5)'}}
-              />
-              <Bar dataKey="presenze" radius={[6, 6, 6, 6]} barSize={35}>
-                {presenzeData.map((entry, index) => (
-                  <Cell key={index} fill={index === 2 ? '#fbbf24' : '#334155'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="chart-box">
-          <h3>💰 Flusso Spese</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={speseData}>
-              <XAxis dataKey="mese" stroke="#94a3b8" axisLine={false} tickLine={false} dy={10} tick={{fontWeight: 'bold'}} />
-              <YAxis hide />
-              <Tooltip 
-                cursor={{fill: 'transparent'}}
-                contentStyle={{background: '#0f172a', border: 'none', borderRadius: '10px', boxShadow: '0 10px 15px rgba(0,0,0,0.5)'}}
-              />
-              <Bar dataKey="spesa" fill="#60a5fa" radius={[6, 6, 6, 6]} barSize={35} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
     </div>
   );
 }
