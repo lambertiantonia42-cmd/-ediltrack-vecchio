@@ -359,6 +359,8 @@ export default function DashboardLayout() {
                   marginBottom: 10,
                   cursor: "pointer",
                   zIndex: 2001,
+                  position: "sticky",
+                  top: "10px",
                 }}
               >
                 ☰

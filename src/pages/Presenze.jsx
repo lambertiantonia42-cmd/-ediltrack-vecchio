@@ -12,7 +12,9 @@ import {
   query,
   serverTimestamp,
   updateDoc,
-  where
+  where,
+  setDoc,
+  getDoc
 } from "firebase/firestore";
 
 import "./Presenze.css";
@@ -58,8 +60,26 @@ export default function Presenze(){
 
   // Stato per più attività/cantieri/orari
   const [attivitaList, setAttivitaList] = useState([
-    { cantiereId:"", cantiereNome:"", orario:"06:00-15:00", attivita:"" }
+    { cantiereId:"", cantiereNome:"", orario:"", attivita:"" }
   ]);
+  // ========== PREDEFINITO ==========
+  const [orarioDefaultDB, setOrarioDefaultDB] = useState("");
+  const [usaPredefinito, setUsaPredefinito] = useState(false);
+
+  // Carica il default da DB una sola volta
+  useEffect(() => {
+    async function fetchDefault() {
+      try {
+        const docRef = doc(db, "settings", AZIENDA_ID);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.orarioDefault) setOrarioDefaultDB(data.orarioDefault);
+        }
+      } catch (e) {}
+    }
+    fetchDefault();
+  }, []);
 
   const [rows,setRows]=useState([]);
   const [cantieriAttivi,setCantieriAttivi]=useState([]);
@@ -260,6 +280,18 @@ export default function Presenze(){
       return;
     }
 
+    let nuovoDefault = orarioDefaultDB;
+
+    if(usaPredefinito && attivitaList[0]?.orario){
+      nuovoDefault = attivitaList[0].orario;
+
+      await setDoc(doc(db, "settings", AZIENDA_ID), {
+        orarioDefault: nuovoDefault
+      }, { merge:true });
+
+      setOrarioDefaultDB(nuovoDefault);
+    }
+
     try{
       setLoading(true);
 
@@ -305,7 +337,7 @@ export default function Presenze(){
       }
 
       // reset
-      setAttivitaList([{ cantiereId:"", cantiereNome:"", orario:"06:00-15:00", attivita:"" }]);
+      setAttivitaList([{ cantiereId:"", cantiereNome:"", orario:nuovoDefault, attivita:"" }]);
       setAttivita("");
       setEditingId(null);
       setTimeout(()=>setLastAddedId(null),1500);
@@ -445,16 +477,38 @@ export default function Presenze(){
                       <option key={c.id} value={c.id}>{c.nome}</option>
                     ))}
                   </select>
-                  <input
-                    value={row.orario}
-                    placeholder="Orario (es: 07:00-08:00)"
-                    onChange={e=>{
-                      const newList=[...attivitaList];
-                      newList[i].orario=e.target.value;
-                      setAttivitaList(newList);
-                    }}
-                    style={{minWidth:"130px"}}
-                  />
+                  <div style={{display:"flex", alignItems:"center", gap:"4px"}}>
+                    <input
+                      value={row.orario}
+                      placeholder="07:00-15:00"
+                      onChange={e=>{
+                        const newList=[...attivitaList];
+                        newList[i].orario=e.target.value;
+                        setAttivitaList(newList);
+                      }}
+                      style={{width:"125px", fontSize:"14px", padding:"8px"}}
+                    />
+
+                    {i === 0 && (
+                      <label style={{
+                        display:"flex",
+                        alignItems:"center",
+                        gap:"4px",
+                        fontSize:"12px",
+                        cursor:"pointer",
+                        color: usaPredefinito ? "#fbbf24" : "#cbd5f5",
+                        fontWeight: usaPredefinito ? "700" : "500"
+                      }}>
+                        <input
+                          type="checkbox"
+                          checked={usaPredefinito}
+                          onChange={(e)=>setUsaPredefinito(e.target.checked)}
+                          style={{width:"14px", height:"14px"}}
+                        />
+                        predefinito
+                      </label>
+                    )}
+                  </div>
                   <input
                     value={row.attivita}
                     placeholder="Attività svolta"
@@ -499,10 +553,12 @@ export default function Presenze(){
               ))}
               <button
                 type="button"
-                onClick={()=>setAttivitaList([
-                  ...attivitaList,
-                  {cantiereId:"", cantiereNome:"", orario:"", attivita:""}
-                ])}
+                onClick={()=>
+                  setAttivitaList([
+                    ...attivitaList,
+                    {cantiereId:"", cantiereNome:"", orario:orarioDefaultDB, attivita:""}
+                  ])
+                }
                 style={{
                   marginTop:"10px",
                   display:"inline-block",
