@@ -74,12 +74,47 @@ export default function Presenze(){
         const snap = await getDoc(docRef);
         if (snap.exists()) {
           const data = snap.data();
-          if (data.orarioDefault) setOrarioDefaultDB(data.orarioDefault);
+          if (data.orarioDefault) {
+            setOrarioDefaultDB(data.orarioDefault);
+
+            // imposta subito nella prima riga
+            setAttivitaList(prev => {
+              if (!prev.length) return prev;
+
+              const updated = [...prev];
+              updated[0] = {
+                ...updated[0],
+                orario: data.orarioDefault
+              };
+
+              return updated;
+            });
+          }
         }
       } catch (e) {}
     }
     fetchDefault();
   }, []);
+
+  useEffect(() => {
+    if (!orarioDefaultDB) return;
+
+    setAttivitaList(prev => {
+      if (!prev.length) return prev;
+
+      const updated = [...prev];
+
+      // se il primo è vuoto → riempilo sempre
+      if (!updated[0].orario) {
+        updated[0] = {
+          ...updated[0],
+          orario: orarioDefaultDB
+        };
+      }
+
+      return updated;
+    });
+  }, [orarioDefaultDB]);
 
   const [rows,setRows]=useState([]);
   const [cantieriAttivi,setCantieriAttivi]=useState([]);
@@ -255,23 +290,16 @@ export default function Presenze(){
     const u=auth.currentUser;
     if(!u) return;
 
-    // 🚫 BLOCCO DUPLICATI (stesso giorno, stesso operaio, stesso cantiere, stesso orario)
-    // (non implementato qui per multi-attività, aggiungere se necessario)
+    // 🚫 BLOCCO DUPLICATI GIORNATA (INTERA o MEZZA)
+    const esisteGiaGiornata = rows.some(r =>
+      r.data === data &&
+      r.dipendente === dipendente &&
+      r.id !== editingId
+    );
 
-    // ⚖️ BLOCCO SOLO PER MEZZA GIORNATA
-    // Se inserisco MEZZA, controllo che non esista già una INTERA per quel giorno/operaio
-    if(Number(giornata) === 0.5){
-      const esisteIntera = rows.some(r =>
-        r.data === data &&
-        r.dipendente === dipendente &&
-        Number(r.giornata) === 1 &&
-        r.id !== editingId
-      );
-
-      if(esisteIntera){
-        setErr("Esiste già una giornata INTERA per questo operaio.");
-        return;
-      }
+    if(esisteGiaGiornata){
+      setErr("Per questo operaio esiste già una giornata registrata. Modifica quella esistente.");
+      return;
     }
 
     // 🔥 ATTIVITA NON PIÙ OBBLIGATORIA
@@ -339,6 +367,7 @@ export default function Presenze(){
       // reset
       setAttivitaList([{ cantiereId:"", cantiereNome:"", orario:nuovoDefault, attivita:"" }]);
       setAttivita("");
+      setDipendente("");
       setEditingId(null);
       setTimeout(()=>setLastAddedId(null),1500);
 
